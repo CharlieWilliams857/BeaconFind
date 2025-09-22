@@ -24,8 +24,14 @@ export default function MapView({ faithGroups, center, zoom = 12 }: MapViewProps
   useEffect(() => {
     if (!mapRef.current) return;
 
-    // Initialize map
-    if (!mapInstance.current) {
+    try {
+      // Clean up existing map before creating new one
+      if (mapInstance.current) {
+        mapInstance.current.remove();
+        mapInstance.current = null;
+      }
+
+      // Initialize map
       mapInstance.current = L.map(mapRef.current).setView(
         center || [37.7749, -122.4194], // Default to San Francisco
         zoom
@@ -34,58 +40,58 @@ export default function MapView({ faithGroups, center, zoom = 12 }: MapViewProps
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(mapInstance.current);
-    }
 
-    const map = mapInstance.current;
+      const map = mapInstance.current;
 
-    // Clear existing markers
-    map.eachLayer((layer: L.Layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    // Add markers for faith groups
-    faithGroups.forEach((faithGroup) => {
-      const lat = parseFloat(faithGroup.latitude);
-      const lng = parseFloat(faithGroup.longitude);
-      
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const marker = L.marker([lat, lng]).addTo(map);
-        
-        marker.bindPopup(`
-          <div class="p-2">
-            <h3 class="font-semibold text-sm mb-1">${faithGroup.name}</h3>
-            <p class="text-xs text-gray-600 mb-1">${faithGroup.denomination || faithGroup.religion}</p>
-            <p class="text-xs text-gray-600">${faithGroup.address}</p>
-          </div>
-        `);
-      }
-    });
-
-    // Update map center if provided
-    if (center) {
-      map.setView([center.lat, center.lng], zoom);
-    } else if (faithGroups.length > 0) {
-      // Fit bounds to show all faith groups
-      const group = new L.FeatureGroup();
+      // Add markers for faith groups
       faithGroups.forEach((faithGroup) => {
         const lat = parseFloat(faithGroup.latitude);
         const lng = parseFloat(faithGroup.longitude);
+        
         if (!isNaN(lat) && !isNaN(lng)) {
-          group.addLayer(L.marker([lat, lng]));
+          const marker = L.marker([lat, lng]).addTo(map);
+          
+          marker.bindPopup(`
+            <div class="p-2">
+              <h3 class="font-semibold text-sm mb-1">${faithGroup.name}</h3>
+              <p class="text-xs text-gray-600 mb-1">${faithGroup.denomination || faithGroup.religion}</p>
+              <p class="text-xs text-gray-600">${faithGroup.address}</p>
+            </div>
+          `);
         }
       });
-      
-      if (group.getLayers().length > 0) {
-        map.fitBounds(group.getBounds().pad(0.1));
+
+      // Update map center if provided
+      if (center) {
+        map.setView([center.lat, center.lng], zoom);
+      } else if (faithGroups.length > 0) {
+        // Fit bounds to show all faith groups
+        const group = new L.FeatureGroup();
+        faithGroups.forEach((faithGroup) => {
+          const lat = parseFloat(faithGroup.latitude);
+          const lng = parseFloat(faithGroup.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            group.addLayer(L.marker([lat, lng]));
+          }
+        });
+        
+        if (group.getLayers().length > 0) {
+          map.fitBounds(group.getBounds().pad(0.1));
+        }
       }
+    } catch (error) {
+      console.error('Error initializing map:', error);
     }
 
     // Cleanup on unmount
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
+      try {
+        if (mapInstance.current) {
+          mapInstance.current.remove();
+          mapInstance.current = null;
+        }
+      } catch (error) {
+        console.warn('Error cleaning up map:', error);
         mapInstance.current = null;
       }
     };

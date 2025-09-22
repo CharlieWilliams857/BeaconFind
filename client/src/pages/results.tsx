@@ -13,12 +13,22 @@ import type { FaithGroup } from "@shared/schema";
 
 export default function Results() {
   const [location, setLocation] = useLocation();
-  const [searchParams, setSearchParams] = useState(() => new URLSearchParams(location.split('?')[1] || ''));
+  const [searchParams, setSearchParams] = useState(() => new URLSearchParams(window.location.search));
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [sortBy, setSortBy] = useState('distance');
 
+  // Update searchParams when URL changes
+  useEffect(() => {
+    console.log('URL DEBUG - window.location.search:', window.location.search);
+    const newSearchParams = new URLSearchParams(window.location.search);
+    console.log('URL DEBUG - parsed searchParams:', newSearchParams.toString());
+    setSearchParams(newSearchParams);
+  }, [location]);
+
   const religion = searchParams.get('religion') || '';
   const locationQuery = searchParams.get('location') || '';
+
+  console.log('SEARCH DEBUG - Religion:', religion, 'LocationQuery:', locationQuery, 'Coordinates:', coordinates);
 
   // Geocode location when search params change
   useEffect(() => {
@@ -48,11 +58,16 @@ export default function Results() {
         params.set('radius', '25'); // 25 mile radius
       }
       
-      const response = await fetch(`/api/faith-groups/search?${params}`);
+      const url = `/api/faith-groups/search?${params}`;
+      console.log('MAKING API CALL:', url);
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to search faith groups');
       }
-      return response.json() as Promise<(FaithGroup & { distance?: number })[]>;
+      const result = await response.json();
+      console.log('API RESPONSE:', result.length, 'items');
+      return result as (FaithGroup & { distance?: number })[];
     },
     enabled: Boolean(religion || coordinates),
   });
@@ -72,6 +87,7 @@ export default function Results() {
     setSearchParams(newParams);
   };
 
+
   // Sort faith groups
   const sortedFaithGroups = [...faithGroups].sort((a, b) => {
     switch (sortBy) {
@@ -84,6 +100,7 @@ export default function Results() {
         return (a.distance || 0) - (b.distance || 0);
     }
   });
+
 
   if (error) {
     return (
