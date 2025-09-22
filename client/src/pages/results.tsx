@@ -19,16 +19,11 @@ export default function Results() {
 
   // Update searchParams when URL changes
   useEffect(() => {
-    console.log('URL DEBUG - window.location.search:', window.location.search);
-    const newSearchParams = new URLSearchParams(window.location.search);
-    console.log('URL DEBUG - parsed searchParams:', newSearchParams.toString());
-    setSearchParams(newSearchParams);
+    setSearchParams(new URLSearchParams(window.location.search));
   }, [location]);
 
   const religion = searchParams.get('religion') || '';
   const locationQuery = searchParams.get('location') || '';
-
-  console.log('SEARCH DEBUG - Religion:', religion, 'LocationQuery:', locationQuery, 'Coordinates:', coordinates);
 
   // Geocode location when search params change
   useEffect(() => {
@@ -58,16 +53,11 @@ export default function Results() {
         params.set('radius', '25'); // 25 mile radius
       }
       
-      const url = `/api/faith-groups/search?${params}`;
-      console.log('MAKING API CALL:', url);
-      
-      const response = await fetch(url);
+      const response = await fetch(`/api/faith-groups/search?${params}`);
       if (!response.ok) {
         throw new Error('Failed to search faith groups');
       }
-      const result = await response.json();
-      console.log('API RESPONSE:', result.length, 'items');
-      return result as (FaithGroup & { distance?: number })[];
+      return response.json() as Promise<(FaithGroup & { distance?: number })[]>;
     },
     enabled: Boolean(religion || coordinates),
   });
