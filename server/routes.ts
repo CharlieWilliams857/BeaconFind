@@ -145,6 +145,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Predictive search suggestions
+  app.get("/api/suggestions/religions", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.json([]);
+      }
+
+      const suggestions = await storage.getReligionSuggestions(q);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Failed to get religion suggestions:", error);
+      res.status(500).json({ message: "Failed to get religion suggestions" });
+    }
+  });
+
+  app.get("/api/suggestions/locations", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.json([]);
+      }
+
+      const suggestions = await storage.getLocationSuggestions(q);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Failed to get location suggestions:", error);
+      res.status(500).json({ message: "Failed to get location suggestions" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

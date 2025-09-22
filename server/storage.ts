@@ -24,6 +24,10 @@ export interface IStorage {
   updateReview(id: string, review: Partial<InsertReview>): Promise<Review | undefined>;
   deleteReview(id: string): Promise<boolean>;
   updateFaithGroupRating(faithGroupId: string): Promise<void>;
+
+  // Suggestion operations for predictive search
+  getReligionSuggestions(query: string): Promise<string[]>;
+  getLocationSuggestions(query: string): Promise<string[]>;
 }
 
 // Calculate distance between two points using Haversine formula
@@ -381,6 +385,45 @@ export class MemStorage implements IStorage {
     
     this.faithGroups.set(faithGroupId, faithGroup);
   }
+
+  // Suggestion operations for predictive search
+  async getReligionSuggestions(query: string): Promise<string[]> {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) return [];
+
+    const suggestions = new Set<string>();
+    
+    // Collect unique religions and denominations
+    Array.from(this.faithGroups.values()).forEach(group => {
+      if (group.religion && group.religion.toLowerCase().includes(normalizedQuery)) {
+        suggestions.add(group.religion);
+      }
+      if (group.denomination && group.denomination.toLowerCase().includes(normalizedQuery)) {
+        suggestions.add(group.denomination);
+      }
+    });
+
+    return Array.from(suggestions).slice(0, 8); // Limit to 8 suggestions
+  }
+
+  async getLocationSuggestions(query: string): Promise<string[]> {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) return [];
+
+    const suggestions = new Set<string>();
+    
+    // Collect unique cities and states
+    Array.from(this.faithGroups.values()).forEach(group => {
+      const cityState = `${group.city}, ${group.state}`;
+      if (group.city.toLowerCase().includes(normalizedQuery) || 
+          group.state.toLowerCase().includes(normalizedQuery) ||
+          cityState.toLowerCase().includes(normalizedQuery)) {
+        suggestions.add(cityState);
+      }
+    });
+
+    return Array.from(suggestions).slice(0, 8); // Limit to 8 suggestions
+  }
 }
 
 // Database implementation using PostgreSQL
@@ -631,6 +674,53 @@ export class DatabaseStorage implements IStorage {
         reviewCount: newReviewCount
       })
       .where(eq(faithGroups.id, faithGroupId));
+  }
+
+  // Suggestion operations for predictive search
+  async getReligionSuggestions(query: string): Promise<string[]> {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) return [];
+
+    // Get distinct religions and denominations that match the query
+    const religionResults = await db
+      .selectDistinct({ value: faithGroups.religion })
+      .from(faithGroups)
+      .where(ilike(faithGroups.religion, `%${normalizedQuery}%`))
+      .limit(5);
+
+    const denominationResults = await db
+      .selectDistinct({ value: faithGroups.denomination })
+      .from(faithGroups)
+      .where(and(
+        sql`${faithGroups.denomination} IS NOT NULL`,
+        ilike(faithGroups.denomination, `%${normalizedQuery}%`)
+      ))
+      .limit(5);
+
+    const suggestions = new Set<string>();
+    religionResults.forEach(r => r.value && suggestions.add(r.value));
+    denominationResults.forEach(d => d.value && suggestions.add(d.value));
+
+    return Array.from(suggestions).slice(0, 8);
+  }
+
+  async getLocationSuggestions(query: string): Promise<string[]> {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) return [];
+
+    // Get distinct city, state combinations that match the query
+    const results = await db
+      .selectDistinct({ 
+        city: faithGroups.city,
+        state: faithGroups.state 
+      })
+      .from(faithGroups)
+      .where(
+        sql`LOWER(${faithGroups.city}) LIKE ${'%' + normalizedQuery + '%'} OR LOWER(${faithGroups.state}) LIKE ${'%' + normalizedQuery + '%'} OR LOWER(CONCAT(${faithGroups.city}, ', ', ${faithGroups.state})) LIKE ${'%' + normalizedQuery + '%'}`
+      )
+      .limit(8);
+
+    return results.map(r => `${r.city}, ${r.state}`);
   }
 
   // Initialize database with sample data if empty

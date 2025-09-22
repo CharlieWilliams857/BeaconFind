@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import AutocompleteInput from "@/components/ui/autocomplete-input";
 import { Search, MapPin } from "lucide-react";
 
 interface SearchBarProps {
@@ -26,28 +26,24 @@ export default function SearchBar({
     <div className="bg-card rounded-2xl p-6 search-shadow max-w-4xl mx-auto" data-testid="search-bar">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input
-              type="text"
-              placeholder="Religion, denomination, or keyword"
-              value={religion}
-              onChange={(e) => setReligion(e.target.value)}
-              className="pl-12 pr-4 py-4 text-lg border-border focus:ring-2 focus:ring-ring"
-              data-testid="input-religion"
-            />
-          </div>
-          <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
-            <Input
-              type="text"
-              placeholder="City, state, or zip code"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="pl-12 pr-4 py-4 text-lg border-border focus:ring-2 focus:ring-ring"
-              data-testid="input-location"
-            />
-          </div>
+          <AutocompleteInput
+            value={religion}
+            onChange={setReligion}
+            placeholder="Religion, denomination, or keyword"
+            icon={<Search className="h-5 w-5" />}
+            endpoint="/api/suggestions/religions"
+            className="py-4 text-lg border-border focus:ring-2 focus:ring-ring"
+            data-testid="input-religion"
+          />
+          <AutocompleteInput
+            value={location}
+            onChange={setLocation}
+            placeholder="City, state, or zip code"
+            icon={<MapPin className="h-5 w-5" />}
+            endpoint="/api/suggestions/locations"
+            className="py-4 text-lg border-border focus:ring-2 focus:ring-ring"
+            data-testid="input-location"
+          />
         </div>
         <Button 
           type="submit" 
