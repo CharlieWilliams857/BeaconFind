@@ -716,7 +716,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(faithGroups)
       .where(
-        sql`LOWER(${faithGroups.city}) LIKE ${'%' + normalizedQuery + '%'} OR LOWER(${faithGroups.state}) LIKE ${'%' + normalizedQuery + '%'} OR LOWER(CONCAT(${faithGroups.city}, ', ', ${faithGroups.state})) LIKE ${'%' + normalizedQuery + '%'}`
+        sql`(LOWER(${faithGroups.city}) LIKE ${`%${normalizedQuery}%`} OR LOWER(${faithGroups.state}) LIKE ${`%${normalizedQuery}%`})`
       )
       .limit(8);
 
