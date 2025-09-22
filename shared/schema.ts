@@ -24,6 +24,7 @@ export const faithGroups = pgTable("faith_groups", {
   reviewCount: integer("review_count").default(0),
   serviceTimes: text("service_times"), // JSON string
   isOpen: text("is_open").default("unknown"), // "open", "closed", "unknown"
+  googlePlaceId: text("google_place_id"), // Google Places API place ID
 });
 
 export const insertFaithGroupSchema = createInsertSchema(faithGroups).omit({

@@ -28,6 +28,10 @@ export interface IStorage {
   // Suggestion operations for predictive search
   getReligionSuggestions(query: string): Promise<string[]>;
   getLocationSuggestions(query: string): Promise<string[]>;
+
+  // Google Places import methods
+  importFromGooglePlaces(faithGroupsData: any[]): Promise<FaithGroup[]>;
+  checkGooglePlaceExists(googlePlaceId: string): Promise<boolean>;
 }
 
 // Calculate distance between two points using Haversine formula
@@ -424,6 +428,29 @@ export class MemStorage implements IStorage {
 
     return Array.from(suggestions).slice(0, 8); // Limit to 8 suggestions
   }
+
+  async importFromGooglePlaces(faithGroupsData: any[]): Promise<FaithGroup[]> {
+    const importedGroups: FaithGroup[] = [];
+    
+    for (const data of faithGroupsData) {
+      // Check if this Google Place already exists
+      if (data.googlePlaceId && await this.checkGooglePlaceExists(data.googlePlaceId)) {
+        console.log(`Skipping duplicate Google Place: ${data.name}`);
+        continue;
+      }
+      
+      const faithGroup = await this.createFaithGroup(data);
+      importedGroups.push(faithGroup);
+    }
+    
+    return importedGroups;
+  }
+
+  async checkGooglePlaceExists(googlePlaceId: string): Promise<boolean> {
+    return Array.from(this.faithGroups.values()).some(
+      fg => fg.googlePlaceId === googlePlaceId
+    );
+  }
 }
 
 // Database implementation using PostgreSQL
@@ -703,6 +730,37 @@ export class DatabaseStorage implements IStorage {
 
     return Array.from(suggestions).slice(0, 8);
   }
+
+  async importFromGooglePlaces(faithGroupsData: any[]): Promise<FaithGroup[]> {
+    const importedGroups: FaithGroup[] = [];
+    
+    for (const data of faithGroupsData) {
+      // Check if this Google Place already exists
+      if (data.googlePlaceId && await this.checkGooglePlaceExists(data.googlePlaceId)) {
+        console.log(`Skipping duplicate Google Place: ${data.name}`);
+        continue;
+      }
+      
+      const faithGroup = await this.createFaithGroup(data);
+      importedGroups.push(faithGroup);
+    }
+    
+    return importedGroups;
+  }
+
+  async checkGooglePlaceExists(googlePlaceId: string): Promise<boolean> {
+    try {
+      const [result] = await db
+        .select({ count: count() })
+        .from(faithGroups)
+        .where(eq(faithGroups.googlePlaceId, googlePlaceId));
+      return result.count > 0;
+    } catch (error) {
+      console.error('Error checking Google Place existence:', error);
+      return false;
+    }
+  }
+
 
   async getLocationSuggestions(query: string): Promise<string[]> {
     const normalizedQuery = query.toLowerCase().trim();

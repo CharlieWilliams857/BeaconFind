@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { searchFaithGroupsSchema, insertFaithGroupSchema } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { googlePlacesService } from "./google-places";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
@@ -173,6 +174,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to get location suggestions:", error);
       res.status(500).json({ message: "Failed to get location suggestions" });
+    }
+  });
+
+  // Google Places API Integration Routes
+  
+  // Search religious places using Google Places API
+  app.get("/api/google-places/search", isAuthenticated, async (req, res) => {
+    try {
+      const searchParams = z.object({
+        lat: z.string().transform(Number),
+        lng: z.string().transform(Number),
+        radius: z.string().transform(Number).optional().default("5000"),
+        query: z.string().optional()
+      }).parse(req.query);
+
+      let results;
+      
+      if (searchParams.query) {
+        // Text search
+        results = await googlePlacesService.searchReligiousByText(
+          searchParams.query,
+          { lat: searchParams.lat, lng: searchParams.lng }
+        );
+      } else {
+        // Nearby search
+        results = await googlePlacesService.searchReligiousPlaces(
+          { lat: searchParams.lat, lng: searchParams.lng },
+          searchParams.radius
+        );
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Error searching Google Places:", error);
+      res.status(500).json({ message: "Failed to search Google Places" });
+    }
+  });
+
+  // Import selected places from Google Places API
+  app.post("/api/google-places/import", isAuthenticated, async (req, res) => {
+    try {
+      const importSchema = z.object({
+        placeIds: z.array(z.string()).min(1).max(50) // Limit to reasonable batch size
+      });
+      
+      const { placeIds } = importSchema.parse(req.body);
+      
+      const importedGroups = [];
+      const errors = [];
+      
+      for (const placeId of placeIds) {
+        try {
+          // Check if place already exists
+          if (await storage.checkGooglePlaceExists(placeId)) {
+            errors.push(`Place ${placeId} already exists in database`);
+            continue;
+          }
+          
+          // Get detailed place information
+          const placeDetails = await googlePlacesService.getPlaceDetails(placeId);
+          if (!placeDetails) {
+            errors.push(`Failed to get details for place ${placeId}`);
+            continue;
+          }
+          
+          // Convert to faith group format
+          const faithGroupData = googlePlacesService.convertToFaithGroup(placeDetails, placeDetails);
+          
+          // Import to database
+          const faithGroup = await storage.createFaithGroup(faithGroupData);
+          importedGroups.push(faithGroup);
+          
+        } catch (error) {
+          console.error(`Error importing place ${placeId}:`, error);
+          errors.push(`Failed to import place ${placeId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+      
+      res.json({
+        imported: importedGroups,
+        importedCount: importedGroups.length,
+        errors: errors,
+        totalRequested: placeIds.length
+      });
+      
+    } catch (error) {
+      console.error("Error importing from Google Places:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid request", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to import from Google Places" });
+      }
     }
   });
 
