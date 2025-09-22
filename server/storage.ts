@@ -1,6 +1,7 @@
-import { type FaithGroup, type InsertFaithGroup, type SearchFaithGroupsParams, faithGroups, users, type User, type UpsertUser } from "@shared/schema";
+import { type FaithGroup, type InsertFaithGroup, type SearchFaithGroupsParams, faithGroups, users, type User, type UpsertUser, reviews, type Review, type InsertReview } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, sql, and } from "drizzle-orm";
+import { eq, ilike, sql, and, desc, avg, count } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 export interface IStorage {
   // User operations (required for Replit Auth)
@@ -14,6 +15,15 @@ export interface IStorage {
   createFaithGroup(faithGroup: InsertFaithGroup): Promise<FaithGroup>;
   updateFaithGroup(id: string, faithGroup: Partial<InsertFaithGroup>): Promise<FaithGroup | undefined>;
   deleteFaithGroup(id: string): Promise<boolean>;
+  
+  // Reviews
+  getReview(id: string): Promise<Review | undefined>;
+  getReviewsByFaithGroup(faithGroupId: string): Promise<(Review & { user: User })[]>;
+  getReviewsByUser(userId: string): Promise<(Review & { faithGroup: FaithGroup })[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  updateReview(id: string, review: Partial<InsertReview>): Promise<Review | undefined>;
+  deleteReview(id: string): Promise<boolean>;
+  updateFaithGroupRating(faithGroupId: string): Promise<void>;
 }
 
 // Calculate distance between two points using Haversine formula
@@ -32,10 +42,12 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 export class MemStorage implements IStorage {
   private faithGroups: Map<string, FaithGroup>;
   private users: Map<string, User>;
+  private reviews: Map<string, Review>;
 
   constructor() {
     this.faithGroups = new Map();
     this.users = new Map();
+    this.reviews = new Map();
     
     // Initialize with sample data for demonstration
     this.initializeSampleData();
@@ -49,7 +61,7 @@ export class MemStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const user: User = {
       ...userData,
-      id: userData.id || crypto.randomUUID(),
+      id: userData.id || randomUUID(),
       createdAt: this.users.get(userData.id!)?.createdAt || new Date(),
       updatedAt: new Date(),
     };
@@ -249,8 +261,8 @@ export class MemStorage implements IStorage {
     const faithGroup: FaithGroup = { 
       ...insertFaithGroup,
       id,
-      rating: "4.5",
-      reviewCount: Math.floor(Math.random() * 200) + 10,
+      rating: "0.0",
+      reviewCount: 0,
       email: insertFaithGroup.email || null,
       phone: insertFaithGroup.phone || null,
       website: insertFaithGroup.website || null,
@@ -274,6 +286,100 @@ export class MemStorage implements IStorage {
 
   async deleteFaithGroup(id: string): Promise<boolean> {
     return this.faithGroups.delete(id);
+  }
+
+  // Review operations (in-memory implementation)
+  async getReview(id: string): Promise<Review | undefined> {
+    return this.reviews.get(id);
+  }
+
+  async getReviewsByFaithGroup(faithGroupId: string): Promise<(Review & { user: User })[]> {
+    const groupReviews = Array.from(this.reviews.values())
+      .filter(review => review.faithGroupId === faithGroupId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return groupReviews
+      .map(review => {
+        const user = this.users.get(review.userId);
+        return user ? { ...review, user } : null;
+      })
+      .filter((review): review is Review & { user: User } => review !== null);
+  }
+
+  async getReviewsByUser(userId: string): Promise<(Review & { faithGroup: FaithGroup })[]> {
+    const userReviews = Array.from(this.reviews.values())
+      .filter(review => review.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    return userReviews
+      .map(review => {
+        const faithGroup = this.faithGroups.get(review.faithGroupId);
+        return faithGroup ? { ...review, faithGroup } : null;
+      })
+      .filter((review): review is Review & { faithGroup: FaithGroup } => review !== null);
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    // Validate that user and faith group exist
+    const user = this.users.get(insertReview.userId);
+    const faithGroup = this.faithGroups.get(insertReview.faithGroupId);
+    
+    if (!user) {
+      throw new Error(`User with id ${insertReview.userId} not found`);
+    }
+    if (!faithGroup) {
+      throw new Error(`Faith group with id ${insertReview.faithGroupId} not found`);
+    }
+
+    const review: Review = {
+      ...insertReview,
+      id: randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.reviews.set(review.id, review);
+    await this.updateFaithGroupRating(insertReview.faithGroupId);
+    return review;
+  }
+
+  async updateReview(id: string, updateData: Partial<InsertReview>): Promise<Review | undefined> {
+    const existing = this.reviews.get(id);
+    if (!existing) return undefined;
+
+    const updated = { ...existing, ...updateData, updatedAt: new Date() };
+    this.reviews.set(id, updated);
+    await this.updateFaithGroupRating(updated.faithGroupId);
+    return updated;
+  }
+
+  async deleteReview(id: string): Promise<boolean> {
+    const review = this.reviews.get(id);
+    if (!review) return false;
+    
+    const deleted = this.reviews.delete(id);
+    if (deleted) {
+      await this.updateFaithGroupRating(review.faithGroupId);
+    }
+    return deleted;
+  }
+
+  async updateFaithGroupRating(faithGroupId: string): Promise<void> {
+    const groupReviews = Array.from(this.reviews.values())
+      .filter(review => review.faithGroupId === faithGroupId);
+    
+    const faithGroup = this.faithGroups.get(faithGroupId);
+    if (!faithGroup) return;
+
+    if (groupReviews.length === 0) {
+      faithGroup.rating = "0.0";
+      faithGroup.reviewCount = 0;
+    } else {
+      const avgRating = groupReviews.reduce((sum, review) => sum + review.rating, 0) / groupReviews.length;
+      faithGroup.rating = avgRating.toFixed(1);
+      faithGroup.reviewCount = groupReviews.length;
+    }
+    
+    this.faithGroups.set(faithGroupId, faithGroup);
   }
 }
 
@@ -379,6 +485,152 @@ export class DatabaseStorage implements IStorage {
       .where(eq(faithGroups.id, id))
       .returning();
     return result.length > 0;
+  }
+
+  // Review operations
+  async getReview(id: string): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, id));
+    return review || undefined;
+  }
+
+  async getReviewsByFaithGroup(faithGroupId: string): Promise<(Review & { user: User })[]> {
+    const results = await db
+      .select({
+        id: reviews.id,
+        userId: reviews.userId,
+        faithGroupId: reviews.faithGroupId,
+        rating: reviews.rating,
+        title: reviews.title,
+        content: reviews.content,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+        user: {
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          createdAt: users.createdAt,
+          updatedAt: users.updatedAt,
+        }
+      })
+      .from(reviews)
+      .leftJoin(users, eq(reviews.userId, users.id))
+      .where(eq(reviews.faithGroupId, faithGroupId))
+      .orderBy(desc(reviews.createdAt));
+    
+    return results.map(row => ({
+      ...row,
+      user: row.user!
+    })) as (Review & { user: User })[];
+  }
+
+  async getReviewsByUser(userId: string): Promise<(Review & { faithGroup: FaithGroup })[]> {
+    const results = await db
+      .select({
+        id: reviews.id,
+        userId: reviews.userId,
+        faithGroupId: reviews.faithGroupId,
+        rating: reviews.rating,
+        title: reviews.title,
+        content: reviews.content,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+        faithGroup: {
+          id: faithGroups.id,
+          name: faithGroups.name,
+          religion: faithGroups.religion,
+          denomination: faithGroups.denomination,
+          description: faithGroups.description,
+          longDescription: faithGroups.longDescription,
+          address: faithGroups.address,
+          city: faithGroups.city,
+          state: faithGroups.state,
+          zipCode: faithGroups.zipCode,
+          latitude: faithGroups.latitude,
+          longitude: faithGroups.longitude,
+          phone: faithGroups.phone,
+          email: faithGroups.email,
+          website: faithGroups.website,
+          rating: faithGroups.rating,
+          reviewCount: faithGroups.reviewCount,
+          serviceTimes: faithGroups.serviceTimes,
+          isOpen: faithGroups.isOpen,
+        }
+      })
+      .from(reviews)
+      .leftJoin(faithGroups, eq(reviews.faithGroupId, faithGroups.id))
+      .where(eq(reviews.userId, userId))
+      .orderBy(desc(reviews.createdAt));
+
+    return results.map(row => ({
+      ...row,
+      faithGroup: row.faithGroup!
+    })) as (Review & { faithGroup: FaithGroup })[];
+  }
+
+  async createReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db
+      .insert(reviews)
+      .values(insertReview)
+      .returning();
+    
+    // Update faith group rating after creating review
+    await this.updateFaithGroupRating(insertReview.faithGroupId);
+    
+    return review;
+  }
+
+  async updateReview(id: string, updateData: Partial<InsertReview>): Promise<Review | undefined> {
+    const [updated] = await db
+      .update(reviews)
+      .set({ ...updateData, updatedAt: new Date() })
+      .where(eq(reviews.id, id))
+      .returning();
+    
+    if (updated) {
+      // Update faith group rating after updating review
+      await this.updateFaithGroupRating(updated.faithGroupId);
+    }
+    
+    return updated || undefined;
+  }
+
+  async deleteReview(id: string): Promise<boolean> {
+    const [deleted] = await db
+      .delete(reviews)
+      .where(eq(reviews.id, id))
+      .returning();
+    
+    if (deleted) {
+      // Update faith group rating after deleting review
+      await this.updateFaithGroupRating(deleted.faithGroupId);
+    }
+    
+    return !!deleted;
+  }
+
+  async updateFaithGroupRating(faithGroupId: string): Promise<void> {
+    // Calculate average rating and count
+    const [result] = await db
+      .select({
+        avgRating: avg(reviews.rating),
+        reviewCount: count(reviews.id)
+      })
+      .from(reviews)
+      .where(eq(reviews.faithGroupId, faithGroupId));
+
+    const newRating = result.avgRating ? parseFloat(result.avgRating).toFixed(1) : "0.0";
+    const newReviewCount = result.reviewCount || 0;
+
+    // Update faith group with new rating and count
+    await db
+      .update(faithGroups)
+      .set({
+        rating: newRating,
+        reviewCount: newReviewCount
+      })
+      .where(eq(faithGroups.id, faithGroupId));
   }
 
   // Initialize database with sample data if empty

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, decimal, integer, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -73,6 +74,51 @@ export const upsertUserSchema = createInsertSchema(users).omit({
 
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Reviews table
+export const reviews = pgTable("reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  faithGroupId: varchar("faith_group_id").notNull().references(() => faithGroups.id, { onDelete: 'cascade' }),
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: text("title"),
+  content: text("content"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  rating: z.number().min(1).max(5),
+  title: z.string().min(1).max(200).optional(),
+  content: z.string().min(10).max(2000).optional(),
+});
+
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviews.$inferSelect;
+
+// Define relations
+export const usersRelations = relations(users, ({ many }) => ({
+  reviews: many(reviews),
+}));
+
+export const faithGroupsRelations = relations(faithGroups, ({ many }) => ({
+  reviews: many(reviews),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
+  faithGroup: one(faithGroups, {
+    fields: [reviews.faithGroupId],
+    references: [faithGroups.id],
+  }),
+}));
 
 export const RELIGIONS = [
   "Christianity",
