@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Results from "@/pages/results";
 import Detail from "@/pages/detail";
+import GooglePlacesImport from "@/pages/GooglePlacesImport";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/search" component={Results} />
       <Route path="/faith-group/:id" component={Detail} />
+      <Route path="/admin/google-places" component={GooglePlacesImport} />
       <Route component={NotFound} />
     </Switch>
   );
