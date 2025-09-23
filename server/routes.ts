@@ -177,6 +177,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced location suggestions for admin import (broader city list)
+  app.get("/api/suggestions/locations/admin", async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || typeof q !== 'string') {
+        return res.json([]);
+      }
+
+      // Common US cities for import suggestions
+      const commonCities = [
+        "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX",
+        "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX", "San Diego, CA",
+        "Dallas, TX", "San Jose, CA", "Austin, TX", "Jacksonville, FL",
+        "Fort Worth, TX", "Columbus, OH", "San Francisco, CA", "Charlotte, NC",
+        "Indianapolis, IN", "Seattle, WA", "Denver, CO", "Boston, MA",
+        "Nashville, TN", "El Paso, TX", "Detroit, MI", "Oklahoma City, OK",
+        "Portland, OR", "Las Vegas, NV", "Memphis, TN", "Louisville, KY",
+        "Baltimore, MD", "Milwaukee, WI", "Albuquerque, NM", "Tucson, AZ",
+        "Fresno, CA", "Mesa, AZ", "Sacramento, CA", "Atlanta, GA",
+        "Kansas City, MO", "Colorado Springs, CO", "Miami, FL", "Raleigh, NC",
+        "Omaha, NE", "Long Beach, CA", "Virginia Beach, VA", "Oakland, CA",
+        "Minneapolis, MN", "Tulsa, OK", "Arlington, TX", "Tampa, FL",
+        "New Orleans, LA", "Wichita, KS", "Cleveland, OH", "Bakersfield, CA"
+      ];
+
+      const normalizedQuery = q.toLowerCase().trim();
+      
+      // Get existing location suggestions first
+      const existingSuggestions = await storage.getLocationSuggestions(q);
+      
+      // Filter common cities that match the query
+      const citySuggestions = commonCities
+        .filter(city => city.toLowerCase().includes(normalizedQuery))
+        .slice(0, 8);
+      
+      // Combine and deduplicate suggestions
+      const allSuggestions = [...new Set([...existingSuggestions, ...citySuggestions])];
+      
+      res.json(allSuggestions.slice(0, 8));
+    } catch (error) {
+      console.error("Failed to get admin location suggestions:", error);
+      res.status(500).json({ message: "Failed to get location suggestions" });
+    }
+  });
+
   // Google Places API Integration Routes
   
   // Search religious places using Google Places API

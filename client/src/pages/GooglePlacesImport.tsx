@@ -252,7 +252,7 @@ export default function GooglePlacesImport() {
                   value={searchLocation}
                   onChange={setSearchLocation}
                   placeholder="e.g., San Francisco, CA"
-                  endpoint="/api/suggestions/locations"
+                  endpoint="/api/suggestions/locations/admin"
                   data-testid="input-location"
                   className="flex-1"
                 />
