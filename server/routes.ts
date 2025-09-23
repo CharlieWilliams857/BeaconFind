@@ -181,8 +181,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      const suggestions = await storage.getReligionSuggestions(q);
-      res.json(suggestions);
+      // Common religion/denomination terms for better suggestions
+      const commonReligions = [
+        "Christianity", "Roman Catholic", "Catholic", "Protestant", "Baptist", "Methodist", 
+        "Episcopal", "Presbyterian", "Lutheran", "Pentecostal", "Orthodox", "Non-denominational Christian",
+        "Judaism", "Orthodox Judaism", "Conservative Judaism", "Reform Judaism", 
+        "Islam", "Sunni Islam", "Shia Islam", "Muslim",
+        "Buddhism", "Hinduism", "Sikhism", "Bahá'í Faith", "Unitarian Universalist"
+      ];
+
+      const normalizedQuery = q.toLowerCase().trim();
+      
+      // Get existing religion suggestions first
+      const existingSuggestions = await storage.getReligionSuggestions(q);
+      
+      // Filter common religions that match the query
+      const religionSuggestions = commonReligions
+        .filter(religion => religion.toLowerCase().includes(normalizedQuery))
+        .slice(0, 8);
+      
+      // Combine and deduplicate suggestions
+      const allSuggestions = Array.from(new Set([...existingSuggestions, ...religionSuggestions]));
+      
+      res.json(allSuggestions.slice(0, 8));
     } catch (error) {
       console.error("Failed to get religion suggestions:", error);
       res.status(500).json({ message: "Failed to get religion suggestions" });
@@ -196,8 +217,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      const suggestions = await storage.getLocationSuggestions(q);
-      res.json(suggestions);
+      // Common major cities to include in suggestions
+      const commonCities = [
+        "Boston, MA", "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX",
+        "Philadelphia, PA", "Phoenix, AZ", "San Antonio, TX", "San Diego, CA", "Dallas, TX",
+        "San Jose, CA", "Austin, TX", "Jacksonville, FL", "Fort Worth, TX", "Columbus, OH",
+        "Charlotte, NC", "San Francisco, CA", "Indianapolis, IN", "Seattle, WA", "Denver, CO",
+        "Washington, DC", "Boston, USA", "Miami, FL", "Atlanta, GA", "Las Vegas, NV"
+      ];
+
+      const normalizedQuery = q.toLowerCase().trim();
+      
+      // Get existing location suggestions first
+      const existingSuggestions = await storage.getLocationSuggestions(q);
+      
+      // Filter common cities that match the query
+      const citySuggestions = commonCities
+        .filter(city => city.toLowerCase().includes(normalizedQuery))
+        .slice(0, 8);
+      
+      // Combine and deduplicate suggestions
+      const allSuggestions = Array.from(new Set([...existingSuggestions, ...citySuggestions]));
+      
+      res.json(allSuggestions.slice(0, 8));
     } catch (error) {
       console.error("Failed to get location suggestions:", error);
       res.status(500).json({ message: "Failed to get location suggestions" });
