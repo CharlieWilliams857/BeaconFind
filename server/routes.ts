@@ -254,6 +254,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search religious places using Google Places API
   app.get("/api/google-places/search", isAuthenticated, async (req, res) => {
     try {
+      console.log("Google Places search request:", req.query);
+      
       const searchParams = z.object({
         lat: z.string().transform(Number),
         lng: z.string().transform(Number),
@@ -261,26 +263,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query: z.string().optional()
       }).parse(req.query);
 
+      console.log("Parsed search params:", searchParams);
+      console.log("Google Maps API Key exists:", !!process.env.GOOGLE_MAPS_API_KEY);
+
       let results;
       
       if (searchParams.query) {
         // Text search
+        console.log("Performing text search with query:", searchParams.query);
         results = await googlePlacesService.searchReligiousByText(
           searchParams.query,
           { lat: searchParams.lat, lng: searchParams.lng }
         );
       } else {
         // Nearby search
+        console.log("Performing nearby search with radius:", searchParams.radius);
         results = await googlePlacesService.searchReligiousPlaces(
           { lat: searchParams.lat, lng: searchParams.lng },
           searchParams.radius
         );
       }
 
+      console.log("Google Places search results:", results ? `${results.results?.length || 0} places found` : "No results");
       res.json(results);
     } catch (error) {
       console.error("Error searching Google Places:", error);
-      res.status(500).json({ message: "Failed to search Google Places" });
+      if (error instanceof z.ZodError) {
+        console.error("Zod validation error details:", error.errors);
+        res.status(400).json({ message: "Invalid search parameters", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to search Google Places" });
+      }
     }
   });
 
