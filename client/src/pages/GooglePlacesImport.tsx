@@ -80,7 +80,27 @@ export default function GooglePlacesImport() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to search Google Places');
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        
+        if (errorData.code === 'AUTH_REQUIRED') {
+          toast({
+            title: "Sign in required",
+            description: "Please sign in to search for places to import",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (errorData.code === 'MISSING_API_KEY') {
+          toast({
+            title: "Configuration required",
+            description: "Google Maps API key not configured. Please contact admin to add GOOGLE_MAPS_API_KEY secret.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        throw new Error(errorData.message || 'Failed to search Google Places');
       }
       
       const data: SearchResponse = await response.json();

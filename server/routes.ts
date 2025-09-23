@@ -251,9 +251,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Google Places API Integration Routes
   
+  // Status check for Google Places functionality
+  app.get("/api/google-places/status", async (req, res) => {
+    const status = {
+      authenticated: !!req.user,
+      apiKeyConfigured: !!process.env.GOOGLE_MAPS_API_KEY,
+      ready: !!req.user && !!process.env.GOOGLE_MAPS_API_KEY
+    };
+    
+    res.json(status);
+  });
+  
   // Search religious places using Google Places API
-  app.get("/api/google-places/search", isAuthenticated, async (req, res) => {
+  app.get("/api/google-places/search", async (req, res) => {
     try {
+      // Check authentication first
+      if (!req.user) {
+        return res.status(401).json({ 
+          code: "AUTH_REQUIRED",
+          message: "Sign in required to search Google Places"
+        });
+      }
+
+      // Check API key is configured
+      if (!process.env.GOOGLE_MAPS_API_KEY) {
+        console.error("Google Maps API key not configured");
+        return res.status(500).json({ 
+          code: "MISSING_API_KEY",
+          message: "Google Maps API key not configured. Please add GOOGLE_MAPS_API_KEY secret."
+        });
+      }
+      
       console.log("Google Places search request:", req.query);
       
       const searchParams = z.object({
@@ -264,7 +292,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).parse(req.query);
 
       console.log("Parsed search params:", searchParams);
-      console.log("Google Maps API Key exists:", !!process.env.GOOGLE_MAPS_API_KEY);
 
       let results;
       
@@ -290,9 +317,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error searching Google Places:", error);
       if (error instanceof z.ZodError) {
         console.error("Zod validation error details:", error.errors);
-        res.status(400).json({ message: "Invalid search parameters", errors: error.errors });
+        res.status(400).json({ 
+          code: "INVALID_PARAMS",
+          message: "Invalid search parameters", 
+          errors: error.errors 
+        });
       } else {
-        res.status(500).json({ message: "Failed to search Google Places" });
+        res.status(500).json({ 
+          code: "SEARCH_FAILED",
+          message: "Failed to search Google Places" 
+        });
       }
     }
   });
