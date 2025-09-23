@@ -126,14 +126,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For now, return mock coordinates for common cities
       const mockCoordinates: Record<string, { lat: number; lng: number }> = {
         'san francisco': { lat: 37.7749, lng: -122.4194 },
+        'san francisco, ca': { lat: 37.7749, lng: -122.4194 },
         'new york': { lat: 40.7128, lng: -74.0060 },
+        'new york, ny': { lat: 40.7128, lng: -74.0060 },
         'los angeles': { lat: 34.0522, lng: -118.2437 },
+        'los angeles, ca': { lat: 34.0522, lng: -118.2437 },
         'chicago': { lat: 41.8781, lng: -87.6298 },
+        'chicago, il': { lat: 41.8781, lng: -87.6298 },
         'houston': { lat: 29.7604, lng: -95.3698 },
+        'houston, tx': { lat: 29.7604, lng: -95.3698 },
+        'boston': { lat: 42.3601, lng: -71.0589 },
+        'boston, ma': { lat: 42.3601, lng: -71.0589 },
+        'seattle': { lat: 47.6062, lng: -122.3321 },
+        'seattle, wa': { lat: 47.6062, lng: -122.3321 },
+        'denver': { lat: 39.7392, lng: -104.9903 },
+        'denver, co': { lat: 39.7392, lng: -104.9903 },
+        'miami': { lat: 25.7617, lng: -80.1918 },
+        'miami, fl': { lat: 25.7617, lng: -80.1918 },
+        'atlanta': { lat: 33.7490, lng: -84.3880 },
+        'atlanta, ga': { lat: 33.7490, lng: -84.3880 },
+        'phoenix': { lat: 33.4484, lng: -112.0740 },
+        'phoenix, az': { lat: 33.4484, lng: -112.0740 },
+        'philadelphia': { lat: 39.9526, lng: -75.1652 },
+        'philadelphia, pa': { lat: 39.9526, lng: -75.1652 },
+        'dallas': { lat: 32.7767, lng: -96.7970 },
+        'dallas, tx': { lat: 32.7767, lng: -96.7970 },
+        'san diego': { lat: 32.7157, lng: -117.1611 },
+        'san diego, ca': { lat: 32.7157, lng: -117.1611 },
       };
 
-      const normalizedLocation = location.toLowerCase();
-      const coords = mockCoordinates[normalizedLocation] || mockCoordinates['san francisco'];
+      const normalizedLocation = location.toLowerCase().trim();
+      const coords = mockCoordinates[normalizedLocation];
+      
+      if (!coords) {
+        return res.status(404).json({ message: `Coordinates not found for location: ${location}` });
+      }
 
       res.json({
         location: location,
@@ -213,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .slice(0, 8);
       
       // Combine and deduplicate suggestions
-      const allSuggestions = [...new Set([...existingSuggestions, ...citySuggestions])];
+      const allSuggestions = Array.from(new Set([...existingSuggestions, ...citySuggestions]));
       
       res.json(allSuggestions.slice(0, 8));
     } catch (error) {
