@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Search, Download, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import AutocompleteInput from "@/components/ui/autocomplete-input";
 
 interface GooglePlace {
   place_id: string;
@@ -247,12 +248,13 @@ export default function GooglePlacesImport() {
             <div>
               <Label htmlFor="location">Location</Label>
               <div className="flex gap-2">
-                <Input
-                  id="location"
-                  placeholder="e.g., San Francisco, CA"
+                <AutocompleteInput
                   value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
+                  onChange={setSearchLocation}
+                  placeholder="e.g., San Francisco, CA"
+                  endpoint="/api/suggestions/locations"
                   data-testid="input-location"
+                  className="flex-1"
                 />
                 <Button onClick={handleLocationSearch} variant="outline" data-testid="button-geocode">
                   <MapPin className="h-4 w-4" />
