@@ -135,11 +135,12 @@ export default function SearchBar({
         </Button>
       </form>
       
-      {/* Dropdown Menu - Positioned to span full search bar width */}
+      {/* Dropdown Menu - Positioned below religion input with full width */}
       {showDropdown && (
         <div 
           ref={dropdownRef}
-          className="absolute left-6 right-6 top-full mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+          className="absolute left-6 right-6 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+          style={{ top: 'calc(1.5rem + 4rem + 0.5rem)' }} // padding-top + input height + gap
           data-testid="religion-dropdown"
         >
           <div className="p-4">
