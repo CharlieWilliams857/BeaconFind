@@ -2,7 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AutocompleteInput from "@/components/ui/autocomplete-input";
-import { Search, MapPin } from "lucide-react";
+import { 
+  Search, 
+  MapPin, 
+  Globe, 
+  Cross, 
+  Moon, 
+  Star, 
+  Building2, 
+  Building, 
+  Church,
+  Home,
+  TreePalm
+} from "lucide-react";
 
 interface SearchBarProps {
   onSearch: (religion: string, location: string) => void;
@@ -10,29 +22,29 @@ interface SearchBarProps {
   defaultLocation?: string;
 }
 
-// Popular religion options for dropdown
+// Popular religion options for dropdown with icons
 const POPULAR_RELIGIONS = [
-  { value: "all", label: "All religious places" },
-  { value: "church", label: "Christian Church" },
-  { value: "catholic church", label: "Catholic Church" },
-  { value: "baptist church", label: "Baptist Church" },
-  { value: "methodist church", label: "Methodist Church" },
-  { value: "presbyterian church", label: "Presbyterian Church" },
-  { value: "lutheran church", label: "Lutheran Church" },
-  { value: "evangelical church", label: "Evangelical Church" },
-  { value: "orthodox church", label: "Orthodox Church" },
-  { value: "mosque", label: "Mosque (Islamic)" },
-  { value: "synagogue", label: "Synagogue (Jewish)" },
-  { value: "temple", label: "Temple" },
-  { value: "hindu temple", label: "Hindu Temple" },
-  { value: "buddhist temple", label: "Buddhist Temple" },
-  { value: "sikh temple", label: "Sikh Temple (Gurdwara)" },
-  { value: "kingdom hall", label: "Kingdom Hall (Jehovah's Witnesses)" },
-  { value: "chapel", label: "Chapel" },
-  { value: "cathedral", label: "Cathedral" },
-  { value: "basilica", label: "Basilica" },
-  { value: "monastery", label: "Monastery" },
-  { value: "abbey", label: "Abbey" },
+  { value: "all", label: "All religious places", icon: Globe },
+  { value: "church", label: "Christian Church", icon: Cross },
+  { value: "catholic church", label: "Catholic Church", icon: Cross },
+  { value: "baptist church", label: "Baptist Church", icon: Cross },
+  { value: "methodist church", label: "Methodist Church", icon: Cross },
+  { value: "presbyterian church", label: "Presbyterian Church", icon: Cross },
+  { value: "lutheran church", label: "Lutheran Church", icon: Cross },
+  { value: "evangelical church", label: "Evangelical Church", icon: Cross },
+  { value: "orthodox church", label: "Orthodox Church", icon: Cross },
+  { value: "mosque", label: "Mosque (Islamic)", icon: Moon },
+  { value: "synagogue", label: "Synagogue (Jewish)", icon: Star },
+  { value: "temple", label: "Temple", icon: Building2 },
+  { value: "hindu temple", label: "Hindu Temple", icon: TreePalm },
+  { value: "buddhist temple", label: "Buddhist Temple", icon: TreePalm },
+  { value: "sikh temple", label: "Sikh Temple (Gurdwara)", icon: Building2 },
+  { value: "kingdom hall", label: "Kingdom Hall (Jehovah's Witnesses)", icon: Building },
+  { value: "chapel", label: "Chapel", icon: Church },
+  { value: "cathedral", label: "Cathedral", icon: Church },
+  { value: "basilica", label: "Basilica", icon: Church },
+  { value: "monastery", label: "Monastery", icon: Home },
+  { value: "abbey", label: "Abbey", icon: Home },
 ];
 
 export default function SearchBar({ 
@@ -113,18 +125,22 @@ export default function SearchBar({
               >
                 <div className="p-4">
                   <h3 className="text-sm font-semibold text-muted-foreground mb-3">Popular Searches</h3>
-                  <div className="space-y-1">
-                    {POPULAR_RELIGIONS.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => handleReligionSelect(option.value, option.label)}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors text-sm"
-                        data-testid={`religion-option-${option.value}`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
+                  <div className="grid grid-cols-2 gap-2">
+                    {POPULAR_RELIGIONS.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleReligionSelect(option.value, option.label)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
+                          data-testid={`religion-option-${option.value}`}
+                        >
+                          <IconComponent className="h-4 w-4 text-muted-foreground" />
+                          <span className="truncate">{option.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
