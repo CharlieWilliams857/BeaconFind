@@ -50,7 +50,7 @@ const POPULAR_RELIGIONS = [
 export default function SearchBar({ 
   onSearch, 
   defaultReligion = "", 
-  defaultLocation = "Boston" 
+  defaultLocation = "Boston, MA" 
 }: SearchBarProps) {
   const [religion, setReligion] = useState(defaultReligion);
   const [location, setLocation] = useState(defaultLocation);
