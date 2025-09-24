@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Search, Download, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -31,6 +32,31 @@ interface SearchResponse {
   results: GooglePlace[];
   next_page_token?: string;
 }
+
+// Common religion options for search
+const RELIGION_OPTIONS = [
+  { value: "all", label: "All religious places" },
+  { value: "church", label: "Christian Church" },
+  { value: "catholic church", label: "Catholic Church" },
+  { value: "baptist church", label: "Baptist Church" },
+  { value: "methodist church", label: "Methodist Church" },
+  { value: "presbyterian church", label: "Presbyterian Church" },
+  { value: "lutheran church", label: "Lutheran Church" },
+  { value: "evangelical church", label: "Evangelical Church" },
+  { value: "orthodox church", label: "Orthodox Church" },
+  { value: "mosque", label: "Mosque (Islamic)" },
+  { value: "synagogue", label: "Synagogue (Jewish)" },
+  { value: "temple", label: "Temple" },
+  { value: "hindu temple", label: "Hindu Temple" },
+  { value: "buddhist temple", label: "Buddhist Temple" },
+  { value: "sikh temple", label: "Sikh Temple (Gurdwara)" },
+  { value: "kingdom hall", label: "Kingdom Hall (Jehovah's Witnesses)" },
+  { value: "chapel", label: "Chapel" },
+  { value: "cathedral", label: "Cathedral" },
+  { value: "basilica", label: "Basilica" },
+  { value: "monastery", label: "Monastery" },
+  { value: "abbey", label: "Abbey" },
+] as const;
 
 export default function GooglePlacesImport() {
   const { toast } = useToast();
@@ -81,7 +107,7 @@ export default function GooglePlacesImport() {
         radius: radius,
       });
       
-      if (searchQuery) {
+      if (searchQuery && searchQuery !== 'all') {
         params.append('query', searchQuery);
       }
       
@@ -314,14 +340,19 @@ export default function GooglePlacesImport() {
             </div>
             
             <div>
-              <Label htmlFor="query">Search Query (Optional)</Label>
-              <Input
-                id="query"
-                placeholder="e.g., baptist church, synagogue"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                data-testid="input-query"
-              />
+              <Label htmlFor="query">Religion Type</Label>
+              <Select value={searchQuery} onValueChange={setSearchQuery}>
+                <SelectTrigger data-testid="select-religion">
+                  <SelectValue placeholder="Select religion type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RELIGION_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
@@ -339,7 +370,7 @@ export default function GooglePlacesImport() {
           </div>
           
           <Button
-            onClick={searchGooglePlaces}
+            onClick={() => searchGooglePlaces()}
             disabled={!coordinates || isSearching}
             className="w-full md:w-auto"
             data-testid="button-search"
