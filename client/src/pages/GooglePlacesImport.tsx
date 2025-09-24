@@ -48,6 +48,8 @@ export default function GooglePlacesImport() {
   // Search results
   const [searchResults, setSearchResults] = useState<GooglePlace[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Geocode location to get coordinates
   const geocodeLocation = async (location: string): Promise<{ lat: number; lng: number }> => {
@@ -60,10 +62,18 @@ export default function GooglePlacesImport() {
   };
 
   // Search Google Places
-  const searchGooglePlaces = async () => {
+  const searchGooglePlaces = async (pageToken?: string) => {
     if (!coordinates) return;
     
-    setIsSearching(true);
+    const isLoadMore = !!pageToken;
+    if (isLoadMore) {
+      setIsLoadingMore(true);
+    } else {
+      setIsSearching(true);
+      setSearchResults([]); // Clear previous results for new search
+      setSelectedPlaces(new Set()); // Clear selections
+    }
+    
     try {
       const params = new URLSearchParams({
         lat: coordinates.lat.toString(),
@@ -73,6 +83,10 @@ export default function GooglePlacesImport() {
       
       if (searchQuery) {
         params.append('query', searchQuery);
+      }
+      
+      if (pageToken) {
+        params.append('pageToken', pageToken);
       }
       
       const response = await fetch(`/api/google-places/search?${params}`, {
@@ -104,10 +118,21 @@ export default function GooglePlacesImport() {
       }
       
       const data: SearchResponse = await response.json();
-      setSearchResults(data.results);
+      
+      // Append results for load more, or replace for new search
+      if (isLoadMore) {
+        setSearchResults(prev => [...prev, ...data.results]);
+      } else {
+        setSearchResults(data.results);
+      }
+      
+      setNextPageToken(data.next_page_token || null);
+      
       toast({
-        title: "Search completed",
-        description: `Found ${data.results.length} religious places near ${searchLocation}`,
+        title: isLoadMore ? "More results loaded" : "Search completed",
+        description: isLoadMore 
+          ? `Loaded ${data.results.length} more places (${searchResults.length + data.results.length} total)`
+          : `Found ${data.results.length} religious places near ${searchLocation}${data.next_page_token ? ' (more available)' : ''}`,
       });
     } catch (error) {
       console.error('Search error:', error);
@@ -118,6 +143,7 @@ export default function GooglePlacesImport() {
       });
     } finally {
       setIsSearching(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -424,6 +450,31 @@ export default function GooglePlacesImport() {
                 </div>
               ))}
             </div>
+            
+            {/* Load More Button */}
+            {nextPageToken && (
+              <div className="mt-6 text-center">
+                <Button
+                  onClick={() => searchGooglePlaces(nextPageToken)}
+                  disabled={isLoadingMore}
+                  variant="outline"
+                  size="lg"
+                  data-testid="button-load-more"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Loading more places...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="h-4 w-4 mr-2" />
+                      Load More Places
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

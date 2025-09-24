@@ -330,7 +330,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lat: z.string().transform(Number),
         lng: z.string().transform(Number),
         radius: z.string().transform(Number).optional().default("5000"),
-        query: z.string().optional()
+        query: z.string().optional(),
+        pageToken: z.string().optional()
       }).parse(req.query);
 
       console.log("Parsed search params:", searchParams);
@@ -342,18 +343,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Performing text search with query:", searchParams.query);
         results = await googlePlacesService.searchReligiousByText(
           searchParams.query,
-          { lat: searchParams.lat, lng: searchParams.lng }
+          { lat: searchParams.lat, lng: searchParams.lng },
+          searchParams.pageToken
         );
       } else {
         // Nearby search
         console.log("Performing nearby search with radius:", searchParams.radius);
         results = await googlePlacesService.searchReligiousPlaces(
           { lat: searchParams.lat, lng: searchParams.lng },
-          searchParams.radius
+          searchParams.radius,
+          searchParams.pageToken
         );
       }
 
-      console.log("Google Places search results:", results ? `${results.results?.length || 0} places found` : "No results");
+      console.log("Google Places search results:", results ? `${results.results?.length || 0} places found${results.next_page_token ? ', more available' : ''}` : "No results");
       res.json(results);
     } catch (error) {
       console.error("Error searching Google Places:", error);
