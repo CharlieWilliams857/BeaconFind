@@ -306,6 +306,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Search religious places using Google Places API
   app.get("/api/google-places/search", async (req, res) => {
+    console.log("🔍 ROUTE HIT: /api/google-places/search");
+    console.log("🔍 RAW QUERY:", req.query);
+    console.log("🔍 pageToken from query:", req.query.pageToken, typeof req.query.pageToken);
     try {
       // Check authentication first
       if (!req.user) {

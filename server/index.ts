@@ -67,5 +67,6 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+    console.log("🚀 SERVER STARTUP - Changes loaded with prominent logging!");
   });
 })();

@@ -91,9 +91,23 @@ export class GooglePlacesService {
         key: this.apiKey
       };
 
-      // Only include pagetoken if it exists and is a non-empty string
-      if (nextPageToken && typeof nextPageToken === 'string' && nextPageToken.trim()) {
-        params.pagetoken = nextPageToken;
+      // CRITICAL: Absolutely ensure pagetoken is never an object
+      if (nextPageToken) {
+        console.log("🔍 PLACES SERVICE - Raw nextPageToken:", nextPageToken, "Type:", typeof nextPageToken);
+        
+        // Convert to string if somehow it's not already
+        const tokenString = String(nextPageToken);
+        
+        // Only include if it's a valid, non-empty string and not "[object Object]"
+        if (typeof nextPageToken === 'string' && 
+            nextPageToken.trim() !== '' && 
+            nextPageToken !== '[object Object]' &&
+            tokenString !== '[object Object]') {
+          params.pagetoken = nextPageToken;
+          console.log("🔍 PLACES SERVICE - Using pagetoken:", nextPageToken);
+        } else {
+          console.log("🔍 PLACES SERVICE - Rejected invalid pagetoken:", nextPageToken, typeof nextPageToken);
+        }
       }
 
       // We'll search for general "place_of_worship" first as it covers most religious sites
@@ -133,9 +147,23 @@ export class GooglePlacesService {
         key: this.apiKey
       };
 
-      // Only include pagetoken if it exists and is a non-empty string
-      if (nextPageToken && typeof nextPageToken === 'string' && nextPageToken.trim()) {
-        params.pagetoken = nextPageToken;
+      // CRITICAL: Absolutely ensure pagetoken is never an object
+      if (nextPageToken) {
+        console.log("🔍 PLACES SERVICE - Raw nextPageToken:", nextPageToken, "Type:", typeof nextPageToken);
+        
+        // Convert to string if somehow it's not already
+        const tokenString = String(nextPageToken);
+        
+        // Only include if it's a valid, non-empty string and not "[object Object]"
+        if (typeof nextPageToken === 'string' && 
+            nextPageToken.trim() !== '' && 
+            nextPageToken !== '[object Object]' &&
+            tokenString !== '[object Object]') {
+          params.pagetoken = nextPageToken;
+          console.log("🔍 PLACES SERVICE - Using pagetoken:", nextPageToken);
+        } else {
+          console.log("🔍 PLACES SERVICE - Rejected invalid pagetoken:", nextPageToken, typeof nextPageToken);
+        }
       }
 
       if (location) {
