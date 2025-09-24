@@ -113,6 +113,43 @@ export default function SearchBar({
               className="py-4 pl-12 text-lg border-border focus:ring-2 focus:ring-ring"
               data-testid="input-religion"
             />
+            
+            {/* Dropdown Menu - Positioned exactly 2px below religion input */}
+            {showDropdown && (
+              <div 
+                ref={dropdownRef}
+                className="absolute bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                style={{ 
+                  position: 'absolute',
+                  top: 'calc(100% + 2px)',
+                  left: '-24px',
+                  right: '-24px',
+                  zIndex: 50
+                }}
+                data-testid="religion-dropdown"
+              >
+                <div className="p-4">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">Popular Searches</h3>
+                  <div className="grid grid-cols-4 gap-2">
+                    {POPULAR_RELIGIONS.map((option) => {
+                      const IconComponent = option.icon;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => handleReligionSelect(option.value, option.label)}
+                          className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
+                          data-testid={`religion-option-${option.value}`}
+                        >
+                          <IconComponent className="h-4 w-4 text-muted-foreground" />
+                          <span className="truncate">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <AutocompleteInput
@@ -134,37 +171,6 @@ export default function SearchBar({
           Search Faith Groups
         </Button>
       </form>
-      
-      {/* Dropdown Menu - Positioned below religion input with full width */}
-      {showDropdown && (
-        <div 
-          ref={dropdownRef}
-          className="absolute left-6 right-6 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
-          style={{ top: 'calc(1.5rem + 4rem + 2px)' }} // padding-top + input height + 2px gap
-          data-testid="religion-dropdown"
-        >
-          <div className="p-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Popular Searches</h3>
-            <div className="grid grid-cols-4 gap-2">
-              {POPULAR_RELIGIONS.map((option) => {
-                const IconComponent = option.icon;
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => handleReligionSelect(option.value, option.label)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
-                    data-testid={`religion-option-${option.value}`}
-                  >
-                    <IconComponent className="h-4 w-4 text-muted-foreground" />
-                    <span className="truncate">{option.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
