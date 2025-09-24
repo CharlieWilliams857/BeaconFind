@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import SearchBar from "@/components/search-bar";
 import FaithGroupCard from "@/components/faith-group-card";
 import MapView from "@/components/map-view";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,13 +61,6 @@ export default function Results() {
     enabled: Boolean(religion || coordinates),
   });
 
-  const handleSearch = (newReligion: string, newLocation: string) => {
-    const params = new URLSearchParams();
-    if (newReligion) params.set('religion', newReligion);
-    if (newLocation) params.set('location', newLocation);
-    setLocation(`/search?${params.toString()}`);
-    setSearchParams(params);
-  };
 
   const removeFilter = (key: string) => {
     const newParams = new URLSearchParams(searchParams);
@@ -104,17 +96,6 @@ export default function Results() {
 
   return (
     <div className="h-full overflow-hidden flex flex-col" data-testid="page-results">
-      {/* Search Header */}
-      <div className="bg-card border-b border-border py-4 px-4 flex-shrink-0">
-        <div className="max-w-7xl mx-auto">
-          <SearchBar 
-            onSearch={handleSearch}
-            defaultReligion={religion}
-            defaultLocation={locationQuery}
-            data-testid="search-bar-header"
-          />
-        </div>
-      </div>
 
       {/* Results Layout */}
       <div className="flex-1 max-w-7xl mx-auto px-4 py-6 overflow-hidden">
