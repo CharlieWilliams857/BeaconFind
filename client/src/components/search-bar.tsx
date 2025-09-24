@@ -140,7 +140,7 @@ export default function SearchBar({
         <div 
           ref={dropdownRef}
           className="absolute left-6 right-6 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
-          style={{ top: 'calc(1.5rem + 4rem + 0.5rem)' }} // padding-top + input height + gap
+          style={{ top: 'calc(1.5rem + 4rem + 2px)' }} // padding-top + input height + 2px gap
           data-testid="religion-dropdown"
         >
           <div className="p-4">
