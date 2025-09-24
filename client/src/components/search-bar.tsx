@@ -97,54 +97,22 @@ export default function SearchBar({
   }, []);
 
   return (
-    <div className="bg-card rounded-2xl p-6 search-shadow max-w-4xl mx-auto" data-testid="search-bar">
+    <div className="bg-card rounded-2xl p-6 search-shadow max-w-4xl mx-auto relative" data-testid="search-bar">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {/* Religion Input with Dropdown */}
+          {/* Religion Input */}
           <div className="relative">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                ref={religionInputRef}
-                value={religion}
-                onChange={(e) => setReligion(e.target.value)}
-                onFocus={handleReligionFocus}
-                onBlur={handleReligionBlur}
-                placeholder="Religion, denomination, or keyword"
-                className="py-4 pl-12 text-lg border-border focus:ring-2 focus:ring-ring"
-                data-testid="input-religion"
-              />
-            </div>
-            
-            {/* Dropdown Menu */}
-            {showDropdown && (
-              <div 
-                ref={dropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
-                data-testid="religion-dropdown"
-              >
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">Popular Searches</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {POPULAR_RELIGIONS.map((option) => {
-                      const IconComponent = option.icon;
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => handleReligionSelect(option.value, option.label)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
-                          data-testid={`religion-option-${option.value}`}
-                        >
-                          <IconComponent className="h-4 w-4 text-muted-foreground" />
-                          <span className="truncate">{option.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+              ref={religionInputRef}
+              value={religion}
+              onChange={(e) => setReligion(e.target.value)}
+              onFocus={handleReligionFocus}
+              onBlur={handleReligionBlur}
+              placeholder="Religion, denomination, or keyword"
+              className="py-4 pl-12 text-lg border-border focus:ring-2 focus:ring-ring"
+              data-testid="input-religion"
+            />
           </div>
           
           <AutocompleteInput
@@ -166,6 +134,36 @@ export default function SearchBar({
           Search Faith Groups
         </Button>
       </form>
+      
+      {/* Dropdown Menu - Positioned to span full search bar width */}
+      {showDropdown && (
+        <div 
+          ref={dropdownRef}
+          className="absolute left-6 right-6 top-full mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+          data-testid="religion-dropdown"
+        >
+          <div className="p-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Popular Searches</h3>
+            <div className="grid grid-cols-4 gap-2">
+              {POPULAR_RELIGIONS.map((option) => {
+                const IconComponent = option.icon;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleReligionSelect(option.value, option.label)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
+                    data-testid={`religion-option-${option.value}`}
+                  >
+                    <IconComponent className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
