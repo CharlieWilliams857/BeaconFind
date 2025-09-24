@@ -83,15 +83,22 @@ export class GooglePlacesService {
         'place_of_worship'
       ];
 
+      // Build params object with proper validation
+      const params: any = {
+        location: `${location.lat},${location.lng}`, // Google Places API expects "lat,lng" string
+        radius: radius,
+        type: 'place_of_worship',
+        key: this.apiKey
+      };
+
+      // Only include pagetoken if it exists and is a non-empty string
+      if (nextPageToken && typeof nextPageToken === 'string' && nextPageToken.trim()) {
+        params.pagetoken = nextPageToken;
+      }
+
       // We'll search for general "place_of_worship" first as it covers most religious sites
       const response = await this.client.placesNearby({
-        params: {
-          location: location,
-          radius: radius,
-          type: 'place_of_worship',
-          key: this.apiKey,
-          pagetoken: nextPageToken
-        }
+        params: params
       });
 
       if (response.data.status === 'OK') {
@@ -123,12 +130,17 @@ export class GooglePlacesService {
     try {
       const params: any = {
         query: `${query} church mosque synagogue temple place of worship`,
-        key: this.apiKey,
-        pagetoken: nextPageToken
+        key: this.apiKey
       };
 
+      // Only include pagetoken if it exists and is a non-empty string
+      if (nextPageToken && typeof nextPageToken === 'string' && nextPageToken.trim()) {
+        params.pagetoken = nextPageToken;
+      }
+
       if (location) {
-        params.location = location;
+        // Google Places API expects location as "lat,lng" string, not object
+        params.location = `${location.lat},${location.lng}`;
         params.radius = 50000; // 50km radius for text search
       }
 

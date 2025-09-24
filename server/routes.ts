@@ -325,6 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log("Google Places search request:", req.query);
+      console.log("Raw pageToken from query:", req.query.pageToken, "Type:", typeof req.query.pageToken);
       
       const searchParams = z.object({
         lat: z.string().transform(Number),
@@ -334,25 +335,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pageToken: z.string().optional()
       }).parse(req.query);
 
+      // Ensure pageToken is valid or remove it completely
+      const validPageToken = searchParams.pageToken && 
+                            typeof searchParams.pageToken === 'string' && 
+                            searchParams.pageToken.trim() !== '' ? 
+                            searchParams.pageToken : undefined;
+
       console.log("Parsed search params:", searchParams);
+      console.log("Valid pageToken:", validPageToken, "Type:", typeof validPageToken);
 
       let results;
       
       if (searchParams.query) {
         // Text search
-        console.log("Performing text search with query:", searchParams.query);
+        console.log("Performing text search with query:", searchParams.query, "pageToken:", validPageToken);
         results = await googlePlacesService.searchReligiousByText(
           searchParams.query,
           { lat: searchParams.lat, lng: searchParams.lng },
-          searchParams.pageToken
+          validPageToken
         );
       } else {
         // Nearby search
-        console.log("Performing nearby search with radius:", searchParams.radius);
+        console.log("Performing nearby search with radius:", searchParams.radius, "pageToken:", validPageToken);
         results = await googlePlacesService.searchReligiousPlaces(
           { lat: searchParams.lat, lng: searchParams.lng },
           searchParams.radius,
-          searchParams.pageToken
+          validPageToken
         );
       }
 
