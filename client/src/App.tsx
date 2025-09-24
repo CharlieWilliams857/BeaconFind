@@ -27,11 +27,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="h-screen bg-background text-foreground overflow-hidden flex flex-col">
+        <div className="min-h-screen bg-background text-foreground">
           <Navbar />
-          <div className="flex-1 overflow-hidden">
-            <Router />
-          </div>
+          <Router />
           <Footer />
         </div>
         <Toaster />
