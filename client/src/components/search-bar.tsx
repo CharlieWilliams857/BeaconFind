@@ -40,11 +40,6 @@ const POPULAR_RELIGIONS = [
   { value: "buddhist temple", label: "Buddhist Temple", icon: TreePalm },
   { value: "sikh temple", label: "Sikh Temple (Gurdwara)", icon: Building2 },
   { value: "kingdom hall", label: "Kingdom Hall (Jehovah's Witnesses)", icon: Building },
-  { value: "chapel", label: "Chapel", icon: Church },
-  { value: "cathedral", label: "Cathedral", icon: Church },
-  { value: "basilica", label: "Basilica", icon: Church },
-  { value: "monastery", label: "Monastery", icon: Home },
-  { value: "abbey", label: "Abbey", icon: Home },
 ];
 
 export default function SearchBar({ 
