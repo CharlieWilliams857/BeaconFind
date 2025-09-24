@@ -132,7 +132,7 @@ export default function SearchBar({
                           key={option.value}
                           type="button"
                           onClick={() => handleReligionSelect(option.value, option.label)}
-                          className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted transition-colors text-sm bg-background"
+                          className="flex items-center gap-2 px-3 py-2 rounded-full border border-border hover:bg-muted hover:border-muted-foreground/20 hover:shadow-sm hover:scale-[1.02] transition-all duration-200 text-sm bg-background"
                           data-testid={`religion-option-${option.value}`}
                         >
                           <IconComponent className="h-4 w-4 text-muted-foreground" />
