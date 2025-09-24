@@ -103,7 +103,7 @@ export default function Results() {
   }
 
   return (
-    <div style={{ height: 'calc(100vh - 65px - 298px)' }} className="overflow-hidden flex flex-col" data-testid="page-results">
+    <div className="h-full overflow-hidden flex flex-col" data-testid="page-results">
       {/* Search Header */}
       <div className="bg-card border-b border-border py-4 px-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto">
