@@ -391,7 +391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/google-places/import", isAuthenticated, async (req, res) => {
     try {
       const importSchema = z.object({
-        placeIds: z.array(z.string()).min(1).max(50) // Limit to reasonable batch size
+        placeIds: z.array(z.string()).min(1).max(100) // Increased limit to handle larger imports
       });
       
       const { placeIds } = importSchema.parse(req.body);
