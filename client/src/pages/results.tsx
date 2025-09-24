@@ -103,9 +103,9 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen" data-testid="page-results">
+    <div style={{ height: 'calc(100vh - 65px - 298px)' }} className="overflow-hidden flex flex-col" data-testid="page-results">
       {/* Search Header */}
-      <div className="bg-card border-b border-border py-4 px-4 sticky top-16 z-40">
+      <div className="bg-card border-b border-border py-4 px-4 flex-shrink-0">
         <div className="max-w-7xl mx-auto">
           <SearchBar 
             onSearch={handleSearch}
@@ -117,8 +117,8 @@ export default function Results() {
       </div>
 
       {/* Results Layout */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[calc(100vh-200px)]">
+      <div className="flex-1 max-w-7xl mx-auto px-4 py-6 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
           {/* Results List */}
           <div className="overflow-y-auto pr-2" data-testid="results-list">
             <div className="flex justify-between items-center mb-6">
@@ -210,7 +210,7 @@ export default function Results() {
           </div>
 
           {/* Map View */}
-          <div className="bg-muted rounded-xl overflow-hidden relative" data-testid="map-container">
+          <div className="bg-muted rounded-xl overflow-hidden h-full" data-testid="map-container">
             <MapView 
               faithGroups={sortedFaithGroups}
               center={coordinates}
