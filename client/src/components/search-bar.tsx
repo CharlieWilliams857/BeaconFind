@@ -122,8 +122,8 @@ export default function SearchBar({
                 style={{ 
                   top: 'calc(100% + 2px)',
                   left: '0',
-                  width: 'calc(100vw - 3rem)',
-                  maxWidth: 'calc(64rem - 3rem)'
+                  right: 'calc(-100% - 1rem)',
+                  width: 'auto'
                 }}
                 data-testid="religion-dropdown"
               >
@@ -141,7 +141,9 @@ export default function SearchBar({
                           data-testid={`religion-option-${option.value}`}
                         >
                           <IconComponent className="h-4 w-4 text-muted-foreground" />
-                          <span className="truncate">{option.label}</span>
+                          <span className="truncate">
+                            {option.label.length > 20 ? option.label.substring(0, 20) + '...' : option.label}
+                          </span>
                         </button>
                       );
                     })}
