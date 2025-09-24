@@ -219,14 +219,22 @@ export default function GooglePlacesImport() {
       return response.json();
     },
     onSuccess: (data: any) => {
+      const { importedCount, totalRequested, skippedCount = 0, errors } = data;
+      
+      let description = `Successfully imported ${importedCount} places`;
+      if (skippedCount > 0) {
+        description += `, ${skippedCount} already existed`;
+      }
+      if (errors && errors.length > 0) {
+        description += `, ${errors.length} failed`;
+        console.error('Import errors:', errors); // Only log actual errors
+      }
+      
       toast({
         title: "Import completed",
-        description: `Imported ${data.importedCount} of ${data.totalRequested} places`,
+        description,
+        variant: errors && errors.length > 0 ? "destructive" : "default",
       });
-      
-      if (data.errors && data.errors.length > 0) {
-        console.warn('Import errors:', data.errors);
-      }
       
       // Clear selections and refresh faith groups
       setSelectedPlaces(new Set());

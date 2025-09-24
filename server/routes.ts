@@ -398,12 +398,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const importedGroups = [];
       const errors = [];
+      const skipped = [];
       
       for (const placeId of placeIds) {
         try {
           // Check if place already exists
           if (await storage.checkGooglePlaceExists(placeId)) {
-            errors.push(`Place ${placeId} already exists in database`);
+            skipped.push(`Place ${placeId} already exists in database`);
             continue;
           }
           
@@ -430,7 +431,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         imported: importedGroups,
         importedCount: importedGroups.length,
-        errors: errors,
+        skippedCount: skipped.length,
+        errors: errors.length > 0 ? errors : undefined, // Only include errors if there are actual errors
         totalRequested: placeIds.length
       });
       
