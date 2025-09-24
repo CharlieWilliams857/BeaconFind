@@ -121,8 +121,7 @@ export default function SearchBar({
                 className="absolute bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
                 style={{ 
                   top: 'calc(100% + 2px)',
-                  left: 'calc(-1.5rem - (50vw - 50%))',
-                  right: 'calc(-1.5rem - (50vw - 50%))',
+                  left: '0',
                   width: 'calc(100vw - 3rem)',
                   maxWidth: 'calc(64rem - 3rem)'
                 }}
