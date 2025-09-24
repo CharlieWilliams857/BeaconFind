@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AutocompleteInputProps {
@@ -27,6 +27,7 @@ export default function AutocompleteInput({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [hasFocused, setHasFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -34,7 +35,7 @@ export default function AutocompleteInput({
   // Fetch suggestions when value changes
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!value || value.length < 2) {
+      if (!value || value.length < 2 || !hasFocused) {
         setSuggestions([]);
         setShowSuggestions(false);
         return;
@@ -46,7 +47,7 @@ export default function AutocompleteInput({
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data);
-          setShowSuggestions(data.length > 0);
+          setShowSuggestions(data.length > 0 && hasFocused);
         }
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
@@ -59,7 +60,7 @@ export default function AutocompleteInput({
 
     const timeoutId = setTimeout(fetchSuggestions, 300); // Debounce
     return () => clearTimeout(timeoutId);
-  }, [value, endpoint]);
+  }, [value, endpoint, hasFocused]);
 
   // Handle clicks outside to close suggestions
   useEffect(() => {
@@ -115,7 +116,16 @@ export default function AutocompleteInput({
     setSelectedIndex(-1);
   };
 
+  const handleClear = () => {
+    onChange('');
+    setShowSuggestions(false);
+    setSelectedIndex(-1);
+    setSuggestions([]);
+    inputRef.current?.focus();
+  };
+
   const handleInputFocus = () => {
+    setHasFocused(true);
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
@@ -139,12 +149,22 @@ export default function AutocompleteInput({
           onFocus={handleInputFocus}
           className={cn(
             icon && "pl-12",
-            "pr-10",
+            "pr-16",
             className
           )}
           disabled={disabled}
           data-testid={testId}
         />
+        {value && !isLoading && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-8 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            data-testid="clear-input"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
         {isLoading && (
           <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
