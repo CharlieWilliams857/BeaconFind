@@ -238,20 +238,21 @@ export default function Detail() {
                 <Navigation className="mr-2 h-4 w-4" />
                 Get Directions
               </Button>
-              <Button 
-                variant="secondary"
-                className="py-3"
-                onClick={() => {
-                  if (faithGroup?.phone) {
-                    window.location.href = `tel:${faithGroup.phone}`;
-                  }
-                }}
-                disabled={!faithGroup?.phone}
-                data-testid="button-call"
-              >
-                <Phone className="mr-2 h-4 w-4" />
-                Call Now
-              </Button>
+              {faithGroup?.website && (
+                <Button 
+                  variant="secondary"
+                  className="py-3"
+                  onClick={() => {
+                    if (faithGroup?.website) {
+                      window.open(faithGroup.website, '_blank');
+                    }
+                  }}
+                  data-testid="button-website"
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  Website
+                </Button>
+              )}
             </div>
 
             {/* Recent Reviews */}
