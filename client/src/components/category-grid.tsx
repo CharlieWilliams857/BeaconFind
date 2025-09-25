@@ -16,7 +16,7 @@ export default function CategoryGrid({ onCategoryClick }: CategoryGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6" data-testid="category-grid">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-6" data-testid="category-grid">
       {RELIGIONS.map((religion) => (
         <div 
           key={religion}
