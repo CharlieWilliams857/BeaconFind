@@ -128,3 +128,18 @@
 .leaflet-popup-content {
   margin: 0;
 }
+
+/* Custom navbar styling */
+.navbar-overlay {
+  display: flex;
+  padding: 10px 20px 7px 22px;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(31, 26, 26, 0.50);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  z-index: 50;
+}
