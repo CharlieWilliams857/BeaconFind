@@ -72,8 +72,8 @@ export default function LatestActivity() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SAMPLE_ACTIVITIES.map((activity) => (
-            <Card key={activity.id} className="border border-border" data-testid={`activity-card-${activity.id}`}>
-              <CardContent className="p-6">
+            <Card key={activity.id} className="activity-card" data-testid={`activity-card-${activity.id}`}>
+              <CardContent className="">
                 <div className="flex items-start space-x-3 mb-4">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-muted text-muted-foreground text-sm">
