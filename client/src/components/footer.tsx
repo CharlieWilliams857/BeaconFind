@@ -77,7 +77,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p data-testid="text-copyright">&copy; 2024 Beacon. All rights reserved.</p>
+          <p data-testid="text-copyright">&copy; 2025 Beacon. All rights reserved.</p>
         </div>
       </div>
     </footer>

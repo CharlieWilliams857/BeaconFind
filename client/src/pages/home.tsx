@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import SearchBar from "@/components/search-bar";
 import CategoryGrid from "@/components/category-grid";
+import LatestActivity from "@/components/latest-activity";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, MapPin } from "lucide-react";
 
@@ -27,7 +28,7 @@ export default function Home() {
       <section className="hero-gradient py-24 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold text-white mb-6" data-testid="text-hero-title">
-            Find Your Faith Community
+            Find Your Faith
           </h1>
           <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto" data-testid="text-hero-subtitle">
             Discover welcoming faith groups, churches, temples, and spiritual communities in your area.
@@ -36,6 +37,9 @@ export default function Home() {
           <SearchBar onSearch={handleSearch} data-testid="search-bar-hero" />
         </div>
       </section>
+
+      {/* Latest Activity */}
+      <LatestActivity />
 
       {/* Quick Categories */}
       <section className="py-16 px-4 bg-muted/30">
