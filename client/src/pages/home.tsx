@@ -27,7 +27,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="hero-gradient py-24 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-white mb-6" data-testid="text-hero-title">
+          <h1 className="text-8xl font-light text-white mb-6" data-testid="text-hero-title">
             Find Your Faith
           </h1>
           <p className="text-xl text-white/90 mb-12 max-w-2xl mx-auto" data-testid="text-hero-subtitle">
