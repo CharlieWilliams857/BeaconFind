@@ -70,7 +70,7 @@ export default function LatestActivity() {
         <h2 className="text-3xl font-bold text-center mb-12" data-testid="text-activity-title">
           Latest Activity
         </h2>
-        <div className="flex items-center gap-6" style={{gap: '24px'}}>
+        <div className="flex flex-wrap items-center" style={{gap: '24px'}}>
           {SAMPLE_ACTIVITIES.map((activity) => (
             <Card key={activity.id} className="activity-card" data-testid={`activity-card-${activity.id}`}>
               <CardContent className="">
