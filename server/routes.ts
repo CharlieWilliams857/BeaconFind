@@ -470,6 +470,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual data initialization endpoint for published apps
+  app.post("/api/admin/initialize-data", async (req, res) => {
+    try {
+      // Check if we're using database storage
+      if (!('initializeSampleData' in storage)) {
+        return res.status(400).json({ 
+          message: "Sample data initialization not available with current storage type" 
+        });
+      }
+
+      // Check current data count
+      const existingGroups = await storage.getFaithGroups();
+      
+      if (existingGroups.length > 0) {
+        return res.json({
+          message: "Database already contains data",
+          currentCount: existingGroups.length,
+          initialized: false
+        });
+      }
+
+      // Initialize sample data
+      await (storage as any).initializeSampleData();
+      
+      // Get updated count
+      const newGroups = await storage.getFaithGroups();
+      
+      res.json({
+        message: "Sample data initialized successfully",
+        currentCount: newGroups.length,
+        initialized: true
+      });
+
+    } catch (error) {
+      console.error("Error initializing sample data:", error);
+      res.status(500).json({ 
+        message: "Failed to initialize sample data",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
