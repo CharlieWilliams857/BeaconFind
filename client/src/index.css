@@ -135,7 +135,7 @@
   padding: 10px 20px 7px 22px;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
