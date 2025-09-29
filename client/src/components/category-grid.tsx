@@ -14,7 +14,7 @@ export default function CategoryGrid({ onCategoryClick }: CategoryGridProps) {
           onClick={() => onCategoryClick(religion)}
           data-testid={`category-${religion.toLowerCase()}`}
         >
-          <div className="bg-card rounded-2xl p-6 group-hover:shadow-lg transition-all duration-200">
+          <div className="bg-card rounded-2xl p-6 border group-hover:shadow-lg transition-all duration-200">
             <h3 className="font-semibold text-foreground" data-testid={`text-${religion.toLowerCase()}`}>
               {religion}
             </h3>
