@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, LogOut } from "lucide-react";
@@ -11,10 +12,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SignInModal from "@/components/sign-in-modal";
 
 export default function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   return (
     <nav className="navbar-overlay" data-testid="navbar">
@@ -73,7 +76,7 @@ export default function Navbar() {
             <Button 
               variant="ghost" 
               className="text-white/70 hover:text-white hover:bg-white/10"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setShowSignInModal(true)}
               data-testid="button-sign-in"
             >
               Sign In
@@ -88,6 +91,11 @@ export default function Navbar() {
           </>
         )}
       </div>
+      
+      <SignInModal 
+        open={showSignInModal} 
+        onOpenChange={setShowSignInModal} 
+      />
     </nav>
   );
 }

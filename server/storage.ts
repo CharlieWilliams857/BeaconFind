@@ -8,6 +8,10 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
+  // Email/password authentication operations
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User>;
+  
   // Faith Groups
   getFaithGroup(id: string): Promise<FaithGroup | undefined>;
   getFaithGroups(): Promise<FaithGroup[]>;
@@ -71,6 +75,27 @@ export class MemStorage implements IStorage {
       ...userData,
       id: userData.id || randomUUID(),
       createdAt: this.users.get(userData.id!)?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  // Email/password authentication operations
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const userArray = Array.from(this.users.values());
+    return userArray.find(user => user.email === email);
+  }
+
+  async createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User> {
+    const user: User = {
+      id: randomUUID(),
+      email: userData.email,
+      password: userData.password,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profileImageUrl: null,
+      createdAt: new Date(),
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -471,6 +496,25 @@ export class DatabaseStorage implements IStorage {
           ...userData,
           updatedAt: new Date(),
         },
+      })
+      .returning();
+    return user;
+  }
+
+  // Email/password authentication operations
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: userData.email,
+        password: userData.password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
       })
       .returning();
     return user;

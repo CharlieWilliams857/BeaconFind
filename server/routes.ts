@@ -4,18 +4,42 @@ import { storage } from "./storage";
 import { searchFaithGroupsSchema, insertFaithGroupSchema } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupEmailAuth } from "./emailAuth";
 import { googlePlacesService } from "./google-places";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
+  
+  // Setup email/password authentication endpoints
+  setupEmailAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes - supports both Replit Auth and email/password auth
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      let userId: string | undefined;
+      
+      // Check for Replit Auth (existing system)
+      if (req.user?.claims?.sub) {
+        userId = req.user.claims.sub;
+      }
+      // Check for email/password auth session
+      else if (req.session?.passport?.user) {
+        userId = req.session.passport.user;
+      }
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
       const user = await storage.getUser(userId);
-      res.json(user);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Return user data without password field for security
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
