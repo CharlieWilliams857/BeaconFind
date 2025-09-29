@@ -16,7 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/search" component={Results} />
-      <Route path="/faith-group/:id" component={Detail} />
+      <Route path="/faith-groups/:id" component={Detail} />
       <Route path="/admin/google-places" component={GooglePlacesImport} />
       <Route component={NotFound} />
     </Switch>
