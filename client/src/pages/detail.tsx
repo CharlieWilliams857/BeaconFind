@@ -138,20 +138,8 @@ export default function Detail() {
             </div>
           </div>
 
-          {/* Thumbnail Images Row */}
+          {/* Main Content */}
           <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {[...Array(4)].map((_, index) => (
-                <div 
-                  key={index} 
-                  className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-lg overflow-hidden"
-                  data-testid={`thumbnail-${index}`}
-                >
-                  <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 opacity-50" />
-                </div>
-              ))}
-            </div>
-
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
               {/* Left Column - About Us */}
