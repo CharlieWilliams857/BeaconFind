@@ -113,7 +113,7 @@ export default function SearchBar({
             {showDropdown && (
               <div 
                 ref={dropdownRef}
-                className="absolute bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+                className="absolute bg-card border border-border rounded-lg shadow-lg z-[9999] max-h-96 overflow-y-auto"
                 style={{ 
                   top: 'calc(100% + 2px)',
                   left: '0',
