@@ -24,7 +24,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "18 minutes ago",
     reviewSnippet: "A warm and welcoming community. The sermons are always thought-provoking and the community is very supportive.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop"
   },
   {
     id: "2", 
@@ -34,7 +34,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "10 minutes ago",
     reviewSnippet: "The atmosphere during Friday prayers is uplifting, and the community outreach programs are excellent.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?w=300&h=200&fit=crop"
   },
   {
     id: "3",
@@ -44,7 +44,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "5 minutes ago",
     reviewSnippet: "An incredible place to find peace and solace. The choir's performances during Sunday service are beautiful.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c93a?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop"
   },
   {
     id: "4",
@@ -54,7 +54,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "2 minutes ago",
     reviewSnippet: "The educational programs for children are outstanding and engaging. Great community involvement.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1607656667195-4dfe814a6cc6?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=300&h=200&fit=crop"
   },
   {
     id: "5",
@@ -64,7 +64,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "1 minute ago",
     reviewSnippet: "A beautiful place for reflection and worship. The architecture is stunning and the services are meaningful.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c93a?w=300&h=200&fit=crop"
   },
   {
     id: "6",
@@ -74,7 +74,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "3 minutes ago",
     reviewSnippet: "The community events are enriching and the speakers always deliver inspiring messages. Highly recommend.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=300&h=200&fit=crop"
   },
   {
     id: "7",
@@ -84,7 +84,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "4 minutes ago",
     reviewSnippet: "A diverse and inclusive space where everyone feels welcome. The community feels like family.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop"
   },
   {
     id: "8",
@@ -94,7 +94,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "6 minutes ago",
     reviewSnippet: "The youth programs are exceptional, fostering fellowship and spiritual growth among young members.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1519491050282-cf00c82424b4?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=300&h=200&fit=crop"
   }
 ];
 
@@ -134,9 +134,6 @@ export default function LatestActivity() {
                       <div className="text-sm">
                         <span className="font-medium text-foreground" data-testid={`user-name-${activity.id}`}>
                           {activity.userName}
-                        </span>
-                        <span className="text-muted-foreground ml-1">
-                          {activity.action}
                         </span>
                       </div>
                       <div className="text-xs text-muted-foreground" data-testid={`time-${activity.id}`}>
