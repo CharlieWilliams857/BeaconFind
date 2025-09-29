@@ -124,7 +124,7 @@ export default function MapView({ faithGroups, center, zoom = 12 }: MapViewProps
           const marker = L.marker([lat, lng], { icon: religiousIcon }).addTo(map);
           
           marker.bindPopup(`
-            <div class="p-4 min-w-64 bg-card text-card-foreground rounded-lg shadow-lg border border-border">
+            <div class="p-4 min-w-64 bg-card text-card-foreground rounded-lg shadow-lg">
               <h3 class="font-semibold text-base mb-2 text-foreground">${faithGroup.name}</h3>
               <div class="flex items-center mb-2">
                 <div class="flex items-center mr-4">
@@ -140,7 +140,7 @@ export default function MapView({ faithGroups, center, zoom = 12 }: MapViewProps
               <p class="text-sm text-muted-foreground mb-2">${faithGroup.denomination || faithGroup.religion}</p>
               <p class="text-xs text-muted-foreground mb-3">${faithGroup.address}</p>
               <div class="flex gap-2">
-                <a href="/faith-groups/${faithGroup.id}" class="inline-flex items-center px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors">
+                <a href="/faith-groups/${faithGroup.id}" class="inline-flex items-center px-3 py-1.5 bg-primary text-white rounded-md text-xs font-medium hover:bg-primary/90 transition-colors">
                   View Details
                 </a>
                 <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(faithGroup.address)}', '_blank')" class="inline-flex items-center px-3 py-1.5 bg-secondary text-secondary-foreground rounded-md text-xs font-medium hover:bg-secondary/80 transition-colors">
