@@ -38,9 +38,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Latest Activity */}
-      <LatestActivity />
-
       {/* Quick Categories */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
@@ -50,6 +47,9 @@ export default function Home() {
           <CategoryGrid onCategoryClick={handleCategoryClick} data-testid="category-grid" />
         </div>
       </section>
+
+      {/* Latest Activity */}
+      <LatestActivity />
 
       {/* Features Section */}
       <section className="py-16 px-4">
