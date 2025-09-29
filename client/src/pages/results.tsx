@@ -109,7 +109,7 @@ export default function Results() {
     <div className="h-full overflow-hidden flex flex-col" data-testid="page-results">
 
       {/* Results Layout */}
-      <div className="flex-1 max-w-7xl mx-auto px-4 pt-8 pb-6 overflow-hidden">
+      <div className="flex-1 max-w-7xl mx-auto px-4 pt-24 pb-6 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
           {/* Results List */}
           <div className="overflow-y-auto pr-2" data-testid="results-list">
