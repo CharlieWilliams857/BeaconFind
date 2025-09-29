@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Star } from "lucide-react";
 
 interface ActivityItem {
   id: string;
@@ -9,59 +10,106 @@ interface ActivityItem {
   faithGroupName: string;
   timeAgo: string;
   reviewSnippet: string;
+  rating: number;
+  imageUrl: string;
 }
 
 // Sample activity data to match Figma design
 const SAMPLE_ACTIVITIES: ActivityItem[] = [
   {
     id: "1",
-    userName: "Dan S.",
+    userName: "Miriam R.",
     action: "wrote a review",
-    faithGroupName: "St. James Church",
-    timeAgo: "24 minutes ago",
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "Temple Beth El",
+    timeAgo: "18 minutes ago",
+    reviewSnippet: "A warm and welcoming community. The sermons are always thought-provoking and the community is very supportive.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop"
   },
   {
     id: "2", 
-    userName: "Dan S.",
+    userName: "Abdul M.",
     action: "wrote a review",
-    faithGroupName: "St. James Church",
-    timeAgo: "24 minutes ago",
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "Al-Falaah Mosque",
+    timeAgo: "10 minutes ago",
+    reviewSnippet: "The atmosphere during Friday prayers is uplifting, and the community outreach programs are excellent.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=300&h=200&fit=crop"
   },
   {
     id: "3",
-    userName: "Dan S.", 
+    userName: "Sarah T.", 
     action: "wrote a review",
-    faithGroupName: "St. James Church",
-    timeAgo: "24 minutes ago",
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "Grace Church",
+    timeAgo: "5 minutes ago",
+    reviewSnippet: "An incredible place to find peace and solace. The choir's performances during Sunday service are beautiful.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c93a?w=300&h=200&fit=crop"
   },
   {
     id: "4",
-    userName: "Dan S.",
+    userName: "David W.",
     action: "wrote a review", 
-    faithGroupName: "St. James Church",
-    timeAgo: "24 minutes ago",
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "Congregation Shaare Shalom",
+    timeAgo: "2 minutes ago",
+    reviewSnippet: "The educational programs for children are outstanding and engaging. Great community involvement.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1607656667195-4dfe814a6cc6?w=300&h=200&fit=crop"
   },
   {
     id: "5",
-    userName: "Dan S.",
+    userName: "Laura H.",
     action: "wrote a review",
-    faithGroupName: "St. James Church", 
-    timeAgo: "24 minutes ago",
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "St. Mark's Cathedral", 
+    timeAgo: "1 minute ago",
+    reviewSnippet: "A beautiful place for reflection and worship. The architecture is stunning and the services are meaningful.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=300&h=200&fit=crop"
   },
   {
     id: "6",
-    userName: "Dan S.",
+    userName: "Mohammed A.",
     action: "wrote a review",
-    faithGroupName: "St. James Church",
-    timeAgo: "24 minutes ago", 
-    reviewSnippet: "Overall great experience here. The main floor and basement were packed, but the dining room"
+    faithGroupName: "Islamic Center Of Peace",
+    timeAgo: "3 minutes ago",
+    reviewSnippet: "The community events are enriching and the speakers always deliver inspiring messages. Highly recommend.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=200&fit=crop"
+  },
+  {
+    id: "7",
+    userName: "Emily P.",
+    action: "wrote a review",
+    faithGroupName: "Unity Temple",
+    timeAgo: "4 minutes ago",
+    reviewSnippet: "A diverse and inclusive space where everyone feels welcome. The community feels like family.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=300&h=200&fit=crop"
+  },
+  {
+    id: "8",
+    userName: "James K.",
+    action: "wrote a review",
+    faithGroupName: "Christ The King Church",
+    timeAgo: "6 minutes ago",
+    reviewSnippet: "The youth programs are exceptional, fostering fellowship and spiritual growth among young members.",
+    rating: 5,
+    imageUrl: "https://images.unsplash.com/photo-1519491050282-cf00c82424b4?w=300&h=200&fit=crop"
   }
 ];
+
+const StarRating = ({ rating, activityId }: { rating: number; activityId: string }) => {
+  return (
+    <div className="flex items-center mb-2" data-testid={`rating-faith-group-${activityId}`}>
+      {[...Array(5)].map((_, i) => (
+        <Star 
+          key={i} 
+          className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function LatestActivity() {
   return (
@@ -70,52 +118,67 @@ export default function LatestActivity() {
         <h2 className="text-3xl font-bold text-center mb-12" data-testid="text-activity-title">
           Latest Activity
         </h2>
-        <div className="h-96 overflow-y-auto">
-          <div className="flex flex-wrap items-center" style={{gap: '24px'}}>
-            {SAMPLE_ACTIVITIES.map((activity) => (
-              <Card key={activity.id} className="activity-card" data-testid={`activity-card-${activity.id}`}>
-              <CardContent className="">
-                <div className="flex items-start space-x-3 mb-4">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-muted text-muted-foreground text-sm">
-                      {activity.userName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm">
-                      <span className="font-medium text-foreground" data-testid={`user-name-${activity.id}`}>
-                        {activity.userName}
-                      </span>
-                      <span className="text-muted-foreground ml-1">
-                        {activity.action}
-                      </span>
-                    </div>
-                    <div className="text-xs text-muted-foreground" data-testid={`time-${activity.id}`}>
-                      {activity.timeAgo}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {SAMPLE_ACTIVITIES.map((activity) => (
+            <Card key={activity.id} className="overflow-hidden hover:shadow-lg transition-shadow" data-testid={`activity-card-${activity.id}`}>
+              <CardContent className="p-0">
+                {/* User Info Header */}
+                <div className="p-4 pb-3">
+                  <div className="flex items-start space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-blue-500 text-white text-sm font-medium">
+                        {activity.userName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm">
+                        <span className="font-medium text-foreground" data-testid={`user-name-${activity.id}`}>
+                          {activity.userName}
+                        </span>
+                        <span className="text-muted-foreground ml-1">
+                          {activity.action}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground" data-testid={`time-${activity.id}`}>
+                        {activity.timeAgo}
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="mb-4">
-                  <h3 className="font-semibold text-foreground mb-2" data-testid={`faith-group-${activity.id}`}>
-                    {activity.faithGroupName}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`review-snippet-${activity.id}`}>
-                    {activity.reviewSnippet}
-                  </p>
+                {/* Faith Group Image */}
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={activity.imageUrl} 
+                    alt={activity.faithGroupName}
+                    className="w-full h-full object-cover"
+                    data-testid={`img-faith-group-${activity.id}`}
+                  />
                 </div>
                 
-                <Button 
-                  variant="link" 
-                  className="p-0 h-auto text-primary text-sm font-medium"
-                  data-testid={`read-more-${activity.id}`}
-                >
-                  Read more
-                </Button>
+                {/* Content */}
+                <div className="p-4">
+                  <StarRating rating={activity.rating} activityId={activity.id} />
+                  
+                  <h3 className="font-semibold text-lg text-foreground mb-2" data-testid={`faith-group-${activity.id}`}>
+                    {activity.faithGroupName}
+                  </h3>
+                  
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-3" data-testid={`review-snippet-${activity.id}`}>
+                    {activity.reviewSnippet}
+                  </p>
+                  
+                  <Button 
+                    variant="link" 
+                    className="p-0 h-auto text-primary text-sm font-medium hover:underline"
+                    data-testid={`read-more-${activity.id}`}
+                  >
+                    Read more
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
-          </div>
         </div>
       </div>
     </section>
