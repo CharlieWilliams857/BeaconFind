@@ -5,6 +5,7 @@ import FaithGroupCard from "@/components/faith-group-card";
 import MapView from "@/components/map-view";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { X } from "lucide-react";
 import { geocodeLocation } from "@/lib/geocoding";
@@ -15,10 +16,12 @@ export default function Results() {
   const [searchParams, setSearchParams] = useState(() => new URLSearchParams(window.location.search));
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [sortBy, setSortBy] = useState('distance');
+  const [displayCount, setDisplayCount] = useState(4);
 
   // Update searchParams when URL changes
   useEffect(() => {
     setSearchParams(new URLSearchParams(window.location.search));
+    setDisplayCount(4); // Reset display count when search changes
   }, [location]);
 
   const religion = searchParams.get('religion') || '';
@@ -83,6 +86,14 @@ export default function Results() {
     }
   });
 
+  // Slice results for display (show only first displayCount items)
+  const displayedFaithGroups = sortedFaithGroups.slice(0, displayCount);
+  const hasMoreResults = sortedFaithGroups.length > displayCount;
+
+  const loadMoreResults = () => {
+    setDisplayCount(prev => Math.min(prev + 4, sortedFaithGroups.length));
+  };
+
 
   if (error) {
     return (
@@ -107,7 +118,10 @@ export default function Results() {
                 Faith Groups{locationQuery && ` in ${locationQuery}`}
               </h2>
               <div className="flex items-center space-x-4">
-                <Select value={sortBy} onValueChange={setSortBy}>
+                <Select value={sortBy} onValueChange={(value) => {
+                  setSortBy(value);
+                  setDisplayCount(4); // Reset display count when sort changes
+                }}>
                   <SelectTrigger className="w-32" data-testid="select-sort">
                     <SelectValue />
                   </SelectTrigger>
@@ -177,14 +191,29 @@ export default function Results() {
                     </p>
                   </div>
                 ) : (
-                  sortedFaithGroups.map((faithGroup) => (
-                    <FaithGroupCard 
-                      key={faithGroup.id} 
-                      faithGroup={faithGroup}
-                      distance={faithGroup.distance}
-                      data-testid={`card-faith-group-${faithGroup.id}`}
-                    />
-                  ))
+                  <>
+                    {displayedFaithGroups.map((faithGroup) => (
+                      <FaithGroupCard 
+                        key={faithGroup.id} 
+                        faithGroup={faithGroup}
+                        distance={faithGroup.distance}
+                        data-testid={`card-faith-group-${faithGroup.id}`}
+                      />
+                    ))}
+                    
+                    {hasMoreResults && (
+                      <div className="flex justify-center pt-6 pb-4">
+                        <Button
+                          onClick={loadMoreResults}
+                          variant="outline"
+                          className="px-8"
+                          data-testid="button-load-more"
+                        >
+                          Show more results ({sortedFaithGroups.length - displayCount} remaining)
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
