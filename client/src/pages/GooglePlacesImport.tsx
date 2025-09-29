@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Search, Download, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { MapPin, Search, Download, CheckCircle, XCircle, Loader2, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import AutocompleteInput from "@/components/ui/autocomplete-input";
@@ -76,6 +76,11 @@ export default function GooglePlacesImport() {
   const [isSearching, setIsSearching] = useState(false);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  
+  // Website scraper state
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [scrapedData, setScrapedData] = useState<any>(null);
+  const [isScrapingWebsite, setIsScrapingWebsite] = useState(false);
 
   // Geocode location to get coordinates
   const geocodeLocation = async (location: string): Promise<{ lat: number; lng: number }> => {
@@ -303,6 +308,53 @@ export default function GooglePlacesImport() {
     return 'Religious Site';
   };
 
+  // Handle website scraping
+  const handleScrapeWebsite = async () => {
+    if (!websiteUrl) {
+      toast({
+        title: "URL Required",
+        description: "Please enter a website URL to scrape",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsScrapingWebsite(true);
+    setScrapedData(null);
+
+    try {
+      const response = await fetch('/api/scrape-website', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ url: websiteUrl }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setScrapedData(data.data);
+        toast({
+          title: "Data Extracted Successfully",
+          description: "Church website data has been extracted. Review the data below.",
+        });
+      } else {
+        throw new Error(data.message || 'Failed to scrape website');
+      }
+    } catch (error) {
+      console.error('Scraping error:', error);
+      toast({
+        title: "Scraping Failed",
+        description: error instanceof Error ? error.message : "Failed to extract data from website",
+        variant: "destructive",
+      });
+    } finally {
+      setIsScrapingWebsite(false);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6 max-w-6xl pt-20">
       <div className="mb-8">
@@ -395,6 +447,119 @@ export default function GooglePlacesImport() {
               </>
             )}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Website Scraper */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Extract Data from Church Website
+          </CardTitle>
+          <CardDescription>
+            Enter a church website URL to automatically extract information like service times, contact details, and descriptions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="websiteUrl">Website URL</Label>
+            <div className="flex gap-2">
+              <Input
+                id="websiteUrl"
+                type="url"
+                value={websiteUrl}
+                onChange={(e) => setWebsiteUrl(e.target.value)}
+                placeholder="https://example-church.org"
+                data-testid="input-website-url"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleScrapeWebsite}
+                disabled={!websiteUrl || isScrapingWebsite}
+                data-testid="button-scrape-website"
+              >
+                {isScrapingWebsite ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-4 w-4 mr-2" />
+                    Extract Data
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* Scraped Data Preview */}
+          {scrapedData && (
+            <div className="mt-6 p-4 bg-muted rounded-lg space-y-3">
+              <h3 className="font-semibold text-lg mb-3">Extracted Data</h3>
+              
+              {scrapedData.name && (
+                <div>
+                  <Label className="text-sm font-medium">Church Name</Label>
+                  <p className="text-sm" data-testid="scraped-name">{scrapedData.name}</p>
+                </div>
+              )}
+              
+              {scrapedData.description && (
+                <div>
+                  <Label className="text-sm font-medium">Description</Label>
+                  <p className="text-sm line-clamp-3" data-testid="scraped-description">{scrapedData.description}</p>
+                </div>
+              )}
+              
+              {scrapedData.phone && (
+                <div>
+                  <Label className="text-sm font-medium">Phone</Label>
+                  <p className="text-sm" data-testid="scraped-phone">{scrapedData.phone}</p>
+                </div>
+              )}
+              
+              {scrapedData.email && (
+                <div>
+                  <Label className="text-sm font-medium">Email</Label>
+                  <p className="text-sm" data-testid="scraped-email">{scrapedData.email}</p>
+                </div>
+              )}
+              
+              {scrapedData.address && (
+                <div>
+                  <Label className="text-sm font-medium">Address</Label>
+                  <p className="text-sm" data-testid="scraped-address">{scrapedData.address}</p>
+                </div>
+              )}
+              
+              {scrapedData.denomination && (
+                <div>
+                  <Label className="text-sm font-medium">Denomination</Label>
+                  <p className="text-sm" data-testid="scraped-denomination">{scrapedData.denomination}</p>
+                </div>
+              )}
+              
+              {scrapedData.serviceTimes && (
+                <div>
+                  <Label className="text-sm font-medium">Service Times</Label>
+                  <p className="text-sm" data-testid="scraped-service-times">{scrapedData.serviceTimes}</p>
+                </div>
+              )}
+              
+              {scrapedData.pastor && (
+                <div>
+                  <Label className="text-sm font-medium">Pastor/Minister</Label>
+                  <p className="text-sm" data-testid="scraped-pastor">{scrapedData.pastor}</p>
+                </div>
+              )}
+
+              <div className="pt-2 text-sm text-muted-foreground">
+                <p>Review the extracted data above. You can manually add this information to your database or combine it with Google Places data.</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

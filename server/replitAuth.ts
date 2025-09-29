@@ -129,12 +129,20 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  const user = req.user as any;
-
-  if (!req.isAuthenticated() || !user.expires_at) {
+  // Check if user is authenticated via any method (Replit Auth or email/password)
+  if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  const user = req.user as any;
+
+  // If user doesn't have expires_at, they're using email/password auth
+  // which doesn't require token refresh - just proceed
+  if (!user.expires_at) {
+    return next();
+  }
+
+  // For Replit Auth users, check if token is expired and refresh if needed
   const now = Math.floor(Date.now() / 1000);
   if (now <= user.expires_at) {
     return next();

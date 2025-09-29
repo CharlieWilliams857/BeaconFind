@@ -6,6 +6,7 @@ import { z } from "zod";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupEmailAuth } from "./emailAuth";
 import { googlePlacesService } from "./google-places";
+import { scrapeChurchWebsite } from "./website-scraper";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
@@ -466,6 +467,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(400).json({ message: "Invalid request", errors: error.errors });
       } else {
         res.status(500).json({ message: "Failed to import from Google Places" });
+      }
+    }
+  });
+
+  // Scrape church website for data extraction
+  app.post("/api/scrape-website", isAuthenticated, async (req, res) => {
+    try {
+      const scrapeSchema = z.object({
+        url: z.string().url()
+      });
+      
+      const { url } = scrapeSchema.parse(req.body);
+      
+      console.log("🌐 Scraping website:", url);
+      const scrapedData = await scrapeChurchWebsite(url);
+      
+      res.json({
+        success: true,
+        data: scrapedData,
+        sourceUrl: url
+      });
+      
+    } catch (error) {
+      console.error("Error scraping website:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ 
+          success: false,
+          message: "Invalid URL", 
+          errors: error.errors 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false,
+          message: `Failed to scrape website: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        });
       }
     }
   });
