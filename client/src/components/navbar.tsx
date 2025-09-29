@@ -13,11 +13,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SignInModal from "@/components/sign-in-modal";
+import { SignUpModal } from "@/components/sign-up-modal";
 
 export default function Navbar() {
   const [location] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
 
   return (
     <nav className="navbar-overlay" data-testid="navbar">
@@ -83,7 +85,7 @@ export default function Navbar() {
             </Button>
             <Button 
               className="bg-white text-black hover:bg-white/90"
-              onClick={() => window.location.href = '/api/login'}
+              onClick={() => setShowSignUpModal(true)}
               data-testid="button-sign-up"
             >
               Sign Up
@@ -95,6 +97,11 @@ export default function Navbar() {
       <SignInModal 
         open={showSignInModal} 
         onOpenChange={setShowSignInModal} 
+      />
+      
+      <SignUpModal 
+        isOpen={showSignUpModal} 
+        onClose={() => setShowSignUpModal(false)} 
       />
     </nav>
   );

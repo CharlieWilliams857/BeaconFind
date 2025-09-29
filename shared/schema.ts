@@ -65,6 +65,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  faith: varchar("faith"), // User's faith/religion
+  location: varchar("location"), // User's city/state
+  userType: varchar("user_type"), // "seeker" or "teacher"
+  faithPractice: varchar("faith_practice"), // For teachers - their specific practice/denomination
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -88,6 +92,19 @@ export const registerSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  faith: z.string().min(1, "Please select your faith"),
+  location: z.string().min(1, "Location is required"),
+  userType: z.enum(["seeker", "teacher"], { errorMap: () => ({ message: "Please select a user type" }) }),
+  faithPractice: z.string().optional(), // Only required for teachers
+}).refine((data) => {
+  // If user is a teacher, faithPractice is required
+  if (data.userType === "teacher" && (!data.faithPractice || data.faithPractice.trim() === "")) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Faith practice is required for teachers",
+  path: ["faithPractice"],
 });
 
 export type LoginData = z.infer<typeof loginSchema>;
@@ -144,5 +161,16 @@ export const RELIGIONS = [
   "Islam",
   "Hinduism",
   "Buddhism",
+  "Sikhism",
+  "Bahá'í",
+  "Jainism",
+  "Shinto",
+  "Taoism",
+  "Zoroastrianism",
   "Other"
+] as const;
+
+export const USER_TYPES = [
+  { value: "seeker", label: "Faith Seeker" },
+  { value: "teacher", label: "Faith Teacher" }
 ] as const;

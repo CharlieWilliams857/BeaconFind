@@ -10,7 +10,7 @@ export interface IStorage {
   
   // Email/password authentication operations
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User>;
+  createUser(userData: { email: string; password: string; firstName: string; lastName: string; faith: string; location: string; userType: string; faithPractice?: string }): Promise<User>;
   
   // Faith Groups
   getFaithGroup(id: string): Promise<FaithGroup | undefined>;
@@ -87,7 +87,7 @@ export class MemStorage implements IStorage {
     return userArray.find(user => user.email === email);
   }
 
-  async createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User> {
+  async createUser(userData: { email: string; password: string; firstName: string; lastName: string; faith: string; location: string; userType: string; faithPractice?: string }): Promise<User> {
     const user: User = {
       id: randomUUID(),
       email: userData.email,
@@ -95,6 +95,10 @@ export class MemStorage implements IStorage {
       firstName: userData.firstName,
       lastName: userData.lastName,
       profileImageUrl: null,
+      faith: userData.faith,
+      location: userData.location,
+      userType: userData.userType,
+      faithPractice: userData.faithPractice || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -507,7 +511,7 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async createUser(userData: { email: string; password: string; firstName: string; lastName: string }): Promise<User> {
+  async createUser(userData: { email: string; password: string; firstName: string; lastName: string; faith: string; location: string; userType: string; faithPractice?: string }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
@@ -515,6 +519,10 @@ export class DatabaseStorage implements IStorage {
         password: userData.password,
         firstName: userData.firstName,
         lastName: userData.lastName,
+        faith: userData.faith,
+        location: userData.location,
+        userType: userData.userType,
+        faithPractice: userData.faithPractice || null,
       })
       .returning();
     return user;

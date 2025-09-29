@@ -32,6 +32,10 @@ async function createUserWithPassword(userData: RegisterData) {
     password: hashedPassword,
     firstName: userData.firstName,
     lastName: userData.lastName,
+    faith: userData.faith,
+    location: userData.location,
+    userType: userData.userType,
+    faithPractice: userData.faithPractice,
   });
 }
 
