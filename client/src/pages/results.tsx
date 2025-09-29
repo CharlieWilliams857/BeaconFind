@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import FaithGroupCard from "@/components/faith-group-card";
 import MapView from "@/components/map-view";
+import SearchBar from "@/components/search-bar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,13 @@ export default function Results() {
     newParams.delete(key);
     setLocation(`/search?${newParams.toString()}`);
     setSearchParams(newParams);
+  };
+
+  const handleSearch = (religionValue: string, locationValue: string) => {
+    const params = new URLSearchParams();
+    if (religionValue) params.set('religion', religionValue);
+    if (locationValue) params.set('location', locationValue);
+    setLocation(`/search?${params.toString()}`);
   };
 
 
@@ -186,9 +194,18 @@ export default function Results() {
               <div className="space-y-4">
                 {sortedFaithGroups.length === 0 ? (
                   <div className="text-center py-12" data-testid="results-empty">
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground mb-8">
                       No faith groups found matching your search criteria.
                     </p>
+                    <div className="max-w-2xl mx-auto">
+                      <h3 className="text-lg font-semibold mb-4">Refine your search</h3>
+                      <SearchBar 
+                        onSearch={handleSearch}
+                        defaultReligion={religion}
+                        defaultLocation={locationQuery}
+                        data-testid="search-bar-empty-state"
+                      />
+                    </div>
                   </div>
                 ) : (
                   <>
