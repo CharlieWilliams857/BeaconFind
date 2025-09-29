@@ -13,7 +13,7 @@ export default function FaithGroupCard({ faithGroup, distance }: FaithGroupCardP
   const [, setLocation] = useLocation();
 
   const handleClick = () => {
-    setLocation(`/faith-group/${faithGroup.id}`);
+    setLocation(`/faith-groups/${faithGroup.id}`);
   };
 
   return (
