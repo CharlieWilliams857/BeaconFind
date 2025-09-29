@@ -274,31 +274,43 @@ export class GooglePlacesService {
       zipCode = stateZip[1] || '';
     }
 
-    // Generate service times from opening hours if available
-    let serviceTimes: any[] = [];
+    // Store Google business hours separately from religious service times
+    let businessHours: any[] = [];
     if (details?.opening_hours?.weekday_text) {
-      serviceTimes = details.opening_hours.weekday_text.map(text => ({
+      businessHours = details.opening_hours.weekday_text.map(text => ({
         day: text.split(': ')[0],
         time: text.split(': ')[1] || 'Closed'
       }));
+    }
+
+    // Always generate appropriate religious service times regardless of Google hours
+    let serviceTimes: any[] = [];
+    if (religion === 'Christianity') {
+      serviceTimes = [
+        { day: 'Sunday Morning', time: '10:00 AM' },
+        { day: 'Sunday Evening', time: '6:00 PM' },
+        { day: 'Wednesday Evening', time: '7:00 PM' }
+      ];
+    } else if (religion === 'Islam') {
+      serviceTimes = [
+        { day: 'Friday Prayer (Jumu\'ah)', time: '12:30 PM' },
+        { day: 'Daily Prayers', time: '5 times daily' }
+      ];
+    } else if (religion === 'Judaism') {
+      serviceTimes = [
+        { day: 'Friday Evening (Shabbat)', time: '6:00 PM' },
+        { day: 'Saturday Morning', time: '10:00 AM' }
+      ];
+    } else if (religion === 'Hinduism') {
+      serviceTimes = [
+        { day: 'Daily Worship', time: 'Multiple times daily' },
+        { day: 'Special Ceremonies', time: 'Various times' }
+      ];
     } else {
-      // Default service times based on religion
-      if (religion === 'Christianity') {
-        serviceTimes = [
-          { day: 'Sunday Morning', time: '10:00 AM' },
-          { day: 'Sunday Evening', time: '6:00 PM' }
-        ];
-      } else if (religion === 'Islam') {
-        serviceTimes = [
-          { day: 'Friday Prayer', time: '12:30 PM' },
-          { day: 'Daily Prayers', time: '5 times daily' }
-        ];
-      } else if (religion === 'Judaism') {
-        serviceTimes = [
-          { day: 'Friday Evening', time: '6:00 PM' },
-          { day: 'Saturday Morning', time: '10:00 AM' }
-        ];
-      }
+      // Default for other religions
+      serviceTimes = [
+        { day: 'Weekly Service', time: 'Contact for times' }
+      ];
     }
 
     return {
@@ -317,6 +329,7 @@ export class GooglePlacesService {
       email: null, // Google doesn't provide email addresses
       website: details?.website || null,
       serviceTimes: JSON.stringify(serviceTimes),
+      businessHours: JSON.stringify(businessHours),
       rating: placeData.rating ? placeData.rating.toString() : '0',
       reviewCount: placeData.user_ratings_total || 0,
       isOpen: (placeData.business_status === 'OPERATIONAL' && !(placeData as any).permanently_closed) ? 'open' : 'closed',

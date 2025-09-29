@@ -22,7 +22,8 @@ export const faithGroups = pgTable("faith_groups", {
   website: text("website"),
   rating: decimal("rating", { precision: 2, scale: 1 }).default("0.0"),
   reviewCount: integer("review_count").default(0),
-  serviceTimes: text("service_times"), // JSON string
+  serviceTimes: text("service_times"), // JSON string for religious service times
+  businessHours: text("business_hours"), // JSON string for Google Places opening hours
   isOpen: text("is_open").default("unknown"), // "open", "closed", "unknown"
   googlePlaceId: text("google_place_id"), // Google Places API place ID
 });

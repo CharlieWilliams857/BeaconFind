@@ -55,18 +55,11 @@ export default function Detail() {
     ? JSON.parse(faithGroup.serviceTimes) 
     : [];
 
-  const mockReviews = [
-    {
-      author: "Sarah M.",
-      rating: 5,
-      text: "Wonderful community! The pastor's messages are inspiring and the congregation is very welcoming. Great programs for families."
-    },
-    {
-      author: "David R.", 
-      rating: 4,
-      text: "Been attending for 2 years. Love the music ministry and the focus on community service. Small groups are a great way to connect."
-    }
-  ];
+  const businessHours = faithGroup?.businessHours 
+    ? JSON.parse(faithGroup.businessHours) 
+    : [];
+
+  // Use actual Google Places rating data instead of mock reviews
 
   return (
     <div className="min-h-screen pt-16" data-testid="page-detail">
@@ -226,6 +219,27 @@ export default function Detail() {
                   </Card>
                 )}
 
+                {/* Business Hours */}
+                {businessHours.length > 0 && (
+                  <Card data-testid="card-business-hours">
+                    <CardContent className="p-6">
+                      <h3 className="text-2xl font-semibold mb-4">Business Hours</h3>
+                      <div className="space-y-3">
+                        {businessHours.map((hours: any, index: number) => (
+                          <div key={index} className="flex justify-between border-b border-gray-100 dark:border-gray-800 pb-2" data-testid={`business-hours-${index}`}>
+                            <span className="font-medium">{hours.day}</span>
+                            <span className="text-muted-foreground">{hours.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-4">
+                        <Clock className="inline w-4 h-4 mr-2" />
+                        Hours sourced from Google Places
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Contact Information */}
                 <Card data-testid="card-contact-info">
                   <CardContent className="p-6">
@@ -313,41 +327,70 @@ export default function Detail() {
             </div>
           </div>
 
-          {/* Recent Reviews Section */}
+          {/* Google Places Rating & Reviews Section */}
           <div className="max-w-7xl mx-auto px-4 py-12">
             <Card data-testid="card-reviews">
               <CardContent className="p-8">
-                <h3 className="text-2xl font-semibold mb-6">Recent Reviews</h3>
-                <div className="space-y-6">
-                  {mockReviews.map((review, index) => (
-                    <div key={index} className="pb-6 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="font-semibold text-lg" data-testid={`review-author-${index}`}>
-                          {review.author}
-                        </span>
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-5 w-5 ${
-                                i < review.rating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
+                <h3 className="text-2xl font-semibold mb-6">Reviews & Rating</h3>
+                
+                {/* Google Rating Display */}
+                <div className="text-center py-8 border-b border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    <div className="text-5xl font-bold text-primary" data-testid="text-google-rating">
+                      {parseFloat(faithGroup.rating || '0').toFixed(1)}
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-6 w-6 ${
+                              i < Math.floor(parseFloat(faithGroup.rating || '0'))
+                                ? 'text-yellow-400 fill-current'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
                       </div>
-                      <p className="text-muted-foreground leading-relaxed" data-testid={`review-text-${index}`}>
-                        {review.text}
+                      <p className="text-lg text-muted-foreground mt-1" data-testid="text-review-count">
+                        Based on {faithGroup.reviewCount || 0} Google reviews
                       </p>
                     </div>
-                  ))}
+                  </div>
                 </div>
-                <div className="mt-8 text-center">
-                  <Button variant="outline" size="lg" data-testid="button-all-reviews">
-                    See all reviews
-                  </Button>
+
+                {/* Business Status */}
+                <div className="py-6 border-b border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      faithGroup.isOpen === 'open' ? 'bg-green-500' : 'bg-red-500'
+                    }`}></div>
+                    <span className="text-lg font-medium" data-testid="text-business-status">
+                      {faithGroup.isOpen === 'open' ? 'Open' : 'Closed'} according to Google Places
+                    </span>
+                  </div>
+                </div>
+
+                {/* View Reviews Button */}
+                <div className="mt-6 text-center">
+                  {faithGroup.googlePlaceId && (
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => {
+                        if (faithGroup.googlePlaceId) {
+                          window.open(`https://search.google.com/local/writereview?placeid=${faithGroup.googlePlaceId}`, '_blank');
+                        }
+                      }}
+                      data-testid="button-all-reviews"
+                    >
+                      <Star className="mr-2 h-4 w-4" />
+                      View Reviews on Google
+                    </Button>
+                  )}
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Reviews and ratings are sourced from Google Places
+                  </p>
                 </div>
               </CardContent>
             </Card>
