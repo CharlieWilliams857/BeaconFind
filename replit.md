@@ -33,6 +33,7 @@ Preferred communication style: Simple, everyday language.
   - POST `/api/faith-groups` - Create new faith group
   - PUT `/api/faith-groups/:id` - Update existing faith group
   - DELETE `/api/faith-groups/:id` - Remove faith group
+  - POST `/api/scrape-website` - Extract church data from website URL (authenticated)
 - **Validation**: Zod schemas for request/response validation and type inference
 - **Error Handling**: Centralized error handling with appropriate HTTP status codes
 
@@ -89,3 +90,32 @@ Preferred communication style: Simple, everyday language.
 - **date-fns**: Modern date utility library for date formatting and manipulation
 - **clsx** and **tailwind-merge**: Utility functions for conditional CSS class management
 - **nanoid**: Secure URL-safe unique ID generator
+- **cheerio**: HTML parsing library for website data extraction
+- **axios**: HTTP client for fetching website content
+
+## Recent Changes
+
+### Website Data Extraction Feature (September 29, 2025)
+Added automated website scraping functionality to extract church information from their websites:
+
+**Backend Components**:
+- `server/website-scraper.ts` - HTML parsing module using Cheerio to extract structured data
+- Extracts: church name, description, phone, email, address, denomination, service times, pastor information
+- Uses pattern matching and keyword detection to identify relevant content
+- POST `/api/scrape-website` endpoint with authentication requirement
+
+**Frontend Components**:
+- New "Extract Data from Church Website" section on Google Places Import page (`/admin/google-places`)
+- URL input field with validation
+- Real-time data extraction with loading states
+- Preview display of extracted data before manual database entry
+
+**Authentication Fix**:
+- Updated `isAuthenticated` middleware to support both Replit Auth and email/password authentication
+- Resolves issue where email/password users couldn't access protected endpoints
+
+**Technical Notes**:
+- Free solution using Cheerio (no API keys required)
+- Handles JavaScript-free websites well
+- Can be upgraded to services like ScrapingBee for JavaScript-heavy sites
+- Security consideration: SSRF risk with user-supplied URLs (admin-only access mitigates risk)
