@@ -23,33 +23,6 @@ export default function Navbar() {
           <MapPin className="text-white text-2xl h-8 w-8" />
           <h1 className="text-2xl font-bold text-white">Beacon</h1>
         </Link>
-        <div className="hidden md:flex space-x-6">
-          <Link 
-            href="/search" 
-            className={`transition-colors ${
-              location === '/search' 
-                ? 'text-white' 
-                : 'text-white/70 hover:text-white'
-            }`}
-            data-testid="link-find-groups"
-          >
-            Find Groups
-          </Link>
-          <a 
-            href="#" 
-            className="text-white/70 hover:text-white transition-colors"
-            data-testid="link-add-group"
-          >
-            Add Your Group
-          </a>
-          <a 
-            href="#" 
-            className="text-white/70 hover:text-white transition-colors"
-            data-testid="link-about"
-          >
-            About
-          </a>
-        </div>
       </div>
       <div className="flex items-center space-x-4">
         {isLoading ? (
