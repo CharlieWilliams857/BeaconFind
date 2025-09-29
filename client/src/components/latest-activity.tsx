@@ -70,9 +70,10 @@ export default function LatestActivity() {
         <h2 className="text-3xl font-bold text-center mb-12" data-testid="text-activity-title">
           Latest Activity
         </h2>
-        <div className="flex flex-wrap items-center" style={{gap: '24px'}}>
-          {SAMPLE_ACTIVITIES.map((activity) => (
-            <Card key={activity.id} className="activity-card" data-testid={`activity-card-${activity.id}`}>
+        <div className="h-96 overflow-y-auto">
+          <div className="flex flex-wrap items-center" style={{gap: '24px'}}>
+            {SAMPLE_ACTIVITIES.map((activity) => (
+              <Card key={activity.id} className="activity-card" data-testid={`activity-card-${activity.id}`}>
               <CardContent className="">
                 <div className="flex items-start space-x-3 mb-4">
                   <Avatar className="h-8 w-8">
@@ -114,6 +115,7 @@ export default function LatestActivity() {
               </CardContent>
             </Card>
           ))}
+          </div>
         </div>
       </div>
     </section>
