@@ -304,7 +304,7 @@ export default function GooglePlacesImport() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="container mx-auto p-6 max-w-6xl pt-20">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Google Places Import</h1>
         <p className="text-muted-foreground">
