@@ -44,7 +44,7 @@ const SAMPLE_ACTIVITIES: ActivityItem[] = [
     timeAgo: "5 minutes ago",
     reviewSnippet: "An incredible place to find peace and solace. The choir's performances during Sunday service are beautiful.",
     rating: 5,
-    imageUrl: "https://images.unsplash.com/photo-1520637836862-4d197d17c93a?w=300&h=200&fit=crop"
+    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=200&fit=crop"
   },
   {
     id: "4",
